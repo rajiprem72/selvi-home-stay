@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Selvi Home Stay — Rameshwaram</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;padding:0;background:#f7f7f8;color:#222}
+  .container{max-width:980px;margin:18px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,0.06)}
+  h1{margin-top:0}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+  .card{padding:12px;border-radius:8px;background:#fff}
+  .availability{display:flex;flex-wrap:wrap;gap:6px}
+  .date{padding:6px 8px;border-radius:6px;font-size:13px}
+  .free{background:#e6ffed;border:1px solid #b2f0c6}
+  .booked{background:#ffecec;border:1px solid #ffbdbd}
+  label{display:block;margin-top:10px}
+  input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #ddd}
+  button{padding:10px 14px;border-radius:8px;border:0;background:#0b74de;color:#fff;cursor:pointer}
+  .muted{color:#666;font-size:14px}
+  .qr{max-width:220px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Selvi Home Stay — Rameshwaram</h1>
+  <p class="muted">Family-friendly stay with modern amenities. Check-in: 12:00 noon. Check-out: 11:00 AM next day. Rate: Rs 3600 / day + GST.</p>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h3>Availability (next 60 days)</h3>
+        <div id="availability" class="availability">Loading...</div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Book your stay</h3>
+        <form id="bookingForm">
+          <label>Main person name<input type="text" name="MainName" required></label>
+          <label>Total Adults<input type="number" name="Adults" min="0" value="2" required></label>
+          <label>Total Kids<input type="number" name="Kids" min="0" value="0"></label>
+          <label>Address<textarea name="Address" rows="2"></textarea></label>
+          <label>Aadhar number<input type="text" name="Aadhar"></label>
+          <label>Mobile number<input type="text" name="Mobile" required></label>
+          <label>From date<input type="date" name="FromDate" required></label>
+          <label>To date<input type="date" name="ToDate" required></label>
+          <p class="muted">Advance Rs 1000 or full amount required to confirm booking.</p>
+          <input type="hidden" name="Source" value="Website">
+          <button type="submit">Request Booking</button>
+        </form>
+        <div id="bookingResult" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Highlights</h3>
+        <ul>
+          <li>Guests may cook (induction provided). Bring your own utensils.</li>
+          <li>20L drinking water provided.</li>
+          <li>Free Wi‑Fi.</li>
+          <li>Free pickup/drop from Rameshwaram Railway Station.</li>
+          <li>Sightseeing & bike rental available.</li>
+          <li>Ocean: 5–10 mins walk; Temple: 20–30 mins walk.</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Payment (owner QR)</h3>
+        <p class="muted">Scan to pay advance (Rs 1000) or full amount.</p>
+        <img id="ownerQr" class="qr" src="OWNER_QR_IMAGE_URL" alt="Owner QR"/>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const GS_WEBAPP_URL = 'GS_WEBAPP_URL';
+const OWNER_QR_IMAGE_URL = 'OWNER_QR_IMAGE_URL';
+document.getElementById('ownerQr').src = OWNER_QR_IMAGE_URL;
+async function fetchAvailability(){
+  const resp = await fetch(GS_WEBAPP_URL + '?action=availability&days=60');
+  const data = await resp.json();
+  const cont = document.getElementById('availability');
+  cont.innerHTML = '';
+  data.forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'date ' + (d.booked? 'booked' : 'free');
+    el.textContent = d.date;
+    cont.appendChild(el);
+  });
+}
+fetchAvailability().catch(()=>document.getElementById('availability').textContent='Failed to load availability');
+const form = document.getElementById('bookingForm');
+form.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const fd = new FormData(form);
+  const obj = {};
+  fd.forEach((v,k)=> obj[k] = v);
+  obj.AdvancePaid = 1000;
+  obj.action = 'create_booking';
+  const resDiv = document.getElementById('bookingResult');
+  resDiv.innerHTML = 'Processing...';
+  try{
+    const resp = await fetch(GS_WEBAPP_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj)});
+    const r = await resp.json();
+    if(r.error){ resDiv.innerHTML = '<b style="color:red">Error: '+r.error+'</b>'; return; }
+    resDiv.innerHTML = `<b style="color:green">Booking created: ${r.bookingId}</b><br/>Total payable: Rs ${r.grandTotal.toFixed(2)}`;
+    fetchAvailability();
+  }catch(err){
+    resDiv.innerHTML = '<b style="color:red">Failed: '+err.message+'</b>';
+  }
+});
+</script>
+</body>
+</html>
