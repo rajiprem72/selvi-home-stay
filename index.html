@@ -61,3 +61,13 @@ document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
     if(json.error){
       resultDiv.innerHTML = `<div class="error">Error: ${json.error}</div>`;
     } else {
+      resultDiv.innerHTML = `<div class="success">✅ Booking received!<br>Booking ID: <b>${json.bookingId}</b><br>Total Amount: ₹${json.total}</div>`;
+      form.reset();
+    }
+  } catch(err){
+    resultDiv.innerHTML = `<div class="error">Error: ${err.message}</div>`;
+  }
+});
+</script>
+</body>
+</html>
