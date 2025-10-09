@@ -1,19 +1,33 @@
-/* ===== Selvi Home Stay - Global Styles ===== */
-body {font-family: system-ui, Segoe UI, Roboto, Arial; margin: 0; padding: 0; background: #f7f7f8; color: #222;}
-header {background: #0b74de; color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;}
+/* ===== Selvi Home Stay - Divine Saffron Theme ===== */
+body {font-family: system-ui, Segoe UI, Roboto, Arial; margin: 0; padding: 0; background: #fffaf3; color: #222;}
+header {background: #d97706; color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000;}
 header h1 {font-size: 22px; margin: 0;}
 nav {display: flex; gap: 15px;}
 nav a {color: white; text-decoration: none; font-weight: 500;}
 nav a:hover {text-decoration: underline;}
-.menu-toggle {display: none; flex-direction: column; cursor: pointer;}
+.menu-toggle {display: none; flex-direction: column; cursor: pointer; position: fixed; top: 16px; right: 20px; z-index: 2000;}
 .menu-toggle span {background: white; height: 3px; width: 25px; margin: 4px 0; border-radius: 2px;}
 @media (max-width: 768px) {
-  nav {display: none; flex-direction: column; background: #0b74de; width: 100%;}
+  nav {display: none; flex-direction: column; background: #d97706; position: fixed; top: 60px; right: 0; width: 200px; padding: 10px;}
   nav.active {display: flex;}
   .menu-toggle {display: flex;}
 }
-.container {max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);}
-h2, h3 {color: #0b74de;}
-.gallery {display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; padding: 20px;}
-.gallery img {width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-footer {background: #0b74de; color: white; text-align: center; padding: 10px; font-size: 14px; margin-top: 30px;}
+.container {max-width: 980px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);}
+h2, h3 {color: #d97706;}
+button {margin-top: 12px; padding: 10px 14px; border: none; background: #f59e0b; color: #fff; border-radius: 8px; cursor: pointer;}
+button:hover {background: #b45309;}
+footer {background: #b45309; color: white; text-align: center; padding: 12px; font-size: 14px; margin-top: 30px;}
+.banner {position: relative; width: 100%; overflow: hidden; height: 250px;}
+.banner img {width: 100%; height: 100%; object-fit: cover; filter: brightness(70%);}
+.banner-text {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.7);}
+.banner-text h1 {margin: 0; font-size: 2rem; font-weight: 700;}
+.banner-text p {font-size: 1.1rem; margin-top: 6px; letter-spacing: 1px;}
+@media (min-width: 768px) {.banner {height: 350px;} .banner-text h1 {font-size: 3rem;} .banner-text p {font-size: 1.3rem;}}
+label{display:block;margin-top:8px;font-weight:500}
+input,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:700px){.form-row{grid-template-columns:1fr}}
+.small-muted{color:#666;font-size:13px}
+.video-wrapper{position:relative;width:100%;max-width:420px;aspect-ratio:9/16;background:#000;border-radius:10px;overflow:hidden;margin:12px auto;}
+.video-wrapper video{width:100%;height:100%;object-fit:cover}
+.map-frame{width:100%;height:320px;border:0;border-radius:10px}
