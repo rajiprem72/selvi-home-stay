@@ -3,62 +3,76 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Selvi Home Stay — Admin Panel</title>
-<style>
-body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;padding:20px;background:#f8f8f9;color:#222}
-.container{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,0.08)}
-label{display:block;margin-top:10px}
-input,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px}
-button{margin-top:15px;padding:10px 16px;background:#0b74de;color:#fff;border:none;border-radius:8px;cursor:pointer}
-</style>
+<title>Admin — Selvi Home Stay</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
+<header>
+  <h1>Selvi Home Stay</h1>
+  <div class="menu-toggle"><span></span><span></span><span></span></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Photos</a>
+    <a href="videos.html">Videos</a>
+    <a href="contact.html">Contact</a>
+    <a href="booking.html">Booking</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
+<div class="banner">
+  <img src="images/banner.jpg" alt="Selvi Home Stay Rameshwaram">
+  <div class="banner-text"><h1>Selvi Home Stay</h1><p>Rameshwaram</p></div>
+</div>
 <div class="container">
-<h2>Selvi Home Stay – Admin Booking Entry</h2>
-<form id="adminForm">
-  <label>Admin Password <input type="password" name="admin_password" required></label>
-  <label>Name <input type="text" name="Name" required></label>
-  <label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
-  <label>Mobile Number <input type="text" name="Mobile" required></label>
-  <label>Address <textarea name="Address" rows="2" required></textarea></label>
 
-  <label>From Date <input type="date" name="FromDate" required></label>
-  <label>To Date <input type="date" name="ToDate" required></label>
-
-  <label>Payment Date <input type="date" name="PaymentDate" required></label>
-  <label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
-  <label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
-
-  <button type="submit">Add Booking</button>
+<h2>Admin Login</h2>
+<form id="adminLoginForm">
+<label>User ID <input type="text" id="adminUser" required></label>
+<label>Password <input type="password" id="adminPass" required></label>
+<button type="submit">Login</button>
 </form>
-
+<div id="adminSection" style="display:none">
+<h3>Admin Booking Form</h3>
+<form id="adminForm">
+<label>Name <input type="text" name="Name" required></label>
+<label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
+<label>Mobile Number <input type="text" name="Mobile" required></label>
+<label>Address <textarea name="Address" rows="2" required></textarea></label>
+<div class="form-row">
+<label>From Date <input type="date" name="FromDate" required></label>
+<label>To Date <input type="date" name="ToDate" required></label>
+</div>
+<div class="form-row">
+<label>Payment Date <input type="date" name="PaymentDate" required></label>
+<label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
+</div>
+<label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
+<button type="submit">Add Booking</button>
+</form>
 <div id="result"></div>
 </div>
-
 <script>
-const GS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwfpC-fwcGLNuFdG8CbxBtdxfk9TJSgG9nETt93_kNWwcugqAiKv86-oqvL_iJLZOgw/exec';
-
+const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwfpC-fwcGLNuFdG8CbxBtdxfk9TJSgG9nETt93_kNWwcugqAiKv86-oqvL_iJLZOgw/exec";
 document.getElementById('adminForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target).entries());
-  data.Source = 'Admin';
   data.action = 'admin_booking';
+  data.Source = 'Admin';
+  data.admin_password = 'SELVI@2025';
   const resDiv = document.getElementById('result');
   resDiv.textContent = 'Processing...';
   try {
-    const res = await fetch(GS_WEBAPP_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(data)
-    });
+    const res = await fetch(GS_WEBAPP_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     const json = await res.json();
-    if(json.error) resDiv.innerHTML = `<span style="color:red">❌ ${json.error}</span>`;
-    else resDiv.innerHTML = `<span style="color:green">✅ Booking added successfully! ID: ${json.bookingId}</span>`;
-    e.target.reset();
-  } catch(err){
-    resDiv.innerHTML = `<span style="color:red">Error: ${err.message}</span>`;
-  }
+    resDiv.innerHTML = json.error ? "<div style='color:red'>Error: " + (json.error||'Unknown') + "</div>" : "<div style='color:green'>✅ Booking added! ID: <b>" + (json.bookingId||'') + "</b></div>";
+    if(!json.error) e.target.reset();
+  } catch(err) { resDiv.innerHTML = "<div style='color:red'>Error: " + err.message + "</div>"; }
 });
 </script>
+
+</div>
+<footer>© 2025 Selvi Home Stay | Designed by Premanandhan Narayanan</footer>
 </body>
 </html>
