@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Gallery — Selvi Home Stay</title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+<style>
+.video-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 10px;
+}
+video {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Selvi Home Stay</h1>
+  <div class="menu-toggle">
+    <span></span><span></span><span></span>
+  </div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Photos</a>
+    <a href="videos.html">Videos</a>
+    <a href="contact.html">Contact</a>
+    <a href="booking.html">Booking</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>Video Gallery 🎬</h2>
+  <p>Explore Selvi Home Stay through our walkthrough videos — get a glimpse of the comfort and facilities offered on both floors.</p>
+
+  <div class="video-container">
+    <section>
+      <h3>Ground Floor Video</h3>
+      <video controls poster="images/groundfloor-thumbnail.jpg">
+        <source src="video/groundfloor.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </section>
+
+    <section>
+      <h3>First Floor Video</h3>
+      <video controls poster="images/firstfloor-thumbnail.jpg">
+        <source src="video/firstfloor.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </section>
+  </div>
+</div>
+
+<footer>© 2025 Selvi Home Stay | Designed by Premanandhan Narayanan</footer>
+
+</body>
+</html>
