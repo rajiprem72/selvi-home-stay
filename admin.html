@@ -53,8 +53,8 @@
 <div id="result"></div>
 </div>
 <script>
-const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzwbONdW9thEDXNA11hPRaJFOz5pQj2G_i897FP8myWOAHO4ymfx_SZuUGwGnCOPRH9KQ/exec";
-document.getElementById('adminForm').addEventListener('submit', async (e)=>{
+  const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw2vQtjD6maNQJtbrvTBaJjvbmgrkPfYj5RZE1BHzXPwhGKbFq8HL7R4xKsBNFeqLhp8w/exec";
+  document.getElementById('adminForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target).entries());
   data.action = 'admin_booking';
