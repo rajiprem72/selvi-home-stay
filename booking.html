@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
 </head>
+
 <body>
 <header>
   <h1>Selvi Home Stay</h1>
@@ -21,30 +22,63 @@
     <a href="admin.html">Admin</a>
   </nav>
 </header>
+
 <div class="banner">
   <img src="images/banner.jpg" alt="Selvi Home Stay Rameshwaram">
 </div>
-<div class="container">
 
+<div class="container">
 <h2>Booking Form</h2>
+
 <form id="bookingForm">
-<label>Name <input type="text" name="Name" required></label>
-<label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
-<label>Mobile Number <input type="text" name="Mobile" required></label>
-<label>Address <textarea name="Address" rows="2" required></textarea></label>
-<div class="form-row">
-<label>From Date <input type="date" name="FromDate" required></label>
-<label>To Date <input type="date" name="ToDate" required></label>
-</div>
-<div class="form-row">
-<label>Payment Date <input type="date" name="PaymentDate" required></label>
-<label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
-</div>
-<label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
-<button type="submit">Submit Booking</button>
+  <label>Name <input type="text" name="Name" required></label>
+  <label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
+  <label>Mobile Number <input type="text" name="Mobile" required></label>
+  <label>Address <textarea name="Address" rows="2" required></textarea></label>
+
+  <div class="form-row">
+    <label>From Date <input type="date" name="FromDate" required></label>
+    <label>To Date <input type="date" name="ToDate" required></label>
+  </div>
+
+  <!-- 🔗 New Pay-Now link -->
+  <p style="text-align:center; margin:12px 0;">
+    <a href="#" onclick="openPaymentPopup(); return false;"
+       style="color:#b45309; font-weight:600; text-decoration:underline;">
+       💰 Click here to Pay for Selvi Home Stay
+    </a>
+  </p>
+
+  <div class="form-row">
+    <label>Payment Date <input type="date" name="PaymentDate" required></label>
+    <label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
+  </div>
+
+  <label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
+
+  <button type="submit">Submit Booking</button>
 </form>
+
 <div id="result"></div>
+</div>
+
+<footer>
+  © 2025 Selvi Home Stay <br>
+  Designed by <br> Premanandhan Narayanan <br>
+  WhatsApp +91 98844 86609
+</footer>
+
 <script>
+/* === Open payment page in centered popup === */
+function openPaymentPopup() {
+  const w = 480, h = 650;
+  const left = (screen.width / 2) - (w / 2);
+  const top = (screen.height / 2) - (h / 2);
+  window.open("payments.html", "SelviHomeStayPayment",
+              `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes`);
+}
+
+/* === Booking form submission === */
 const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwfpC-fwcGLNuFdG8CbxBtdxfk9TJSgG9nETt93_kNWwcugqAiKv86-oqvL_iJLZOgw/exec";
 document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -54,15 +88,21 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   const resDiv = document.getElementById('result');
   resDiv.textContent = 'Submitting...';
   try {
-    const res = await fetch(GS_WEBAPP_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const res = await fetch(GS_WEBAPP_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
     const json = await res.json();
-    resDiv.innerHTML = json.error ? "<div style='color:red'>Error: " + (json.error||'Unknown') + "</div>" : "<div style='color:green'>✅ Booking received! ID: <b>" + (json.bookingId||'') + "</b></div>";
-    if(!json.error) e.target.reset();
-  } catch(err) { resDiv.innerHTML = "<div style='color:red'>Error: " + err.message + "</div>"; }
+    resDiv.innerHTML = json.error
+      ? `<div style='color:red'>Error: ${json.error || 'Unknown'}</div>`
+      : `<div style='color:green'>✅ Booking received! ID: <b>${json.bookingId || ''}</b></div>`;
+    if (!json.error) e.target.reset();
+  } catch(err) {
+    resDiv.innerHTML = `<div style='color:red'>Error: ${err.message}</div>`;
+  }
 });
 </script>
 
-</div>
-<footer>© 2025 Selvi Home Stay <br> Designed by <br> Premanandhan Narayanan <br> WhatsApp +91 98844 86609</footer>
 </body>
 </html>
