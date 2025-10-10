@@ -7,6 +7,30 @@
 <link rel="icon" type="image/png" href="images/favicon.png">
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
+<style>
+  /* Added styles for gallery captions and spacing */
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2em; /* 2 line spaces between each image block */
+    margin-top: 1em;
+  }
+  .gallery-item {
+    text-align: center;
+  }
+  .gallery-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .gallery-item h3 {
+    margin-top: 0.8em;
+    font-size: 1.1em;
+    color: #333;
+  }
+</style>
 </head>
 <body>
 <header>
@@ -14,31 +38,60 @@
   <div class="menu-toggle"><span></span><span></span><span></span></div>
   <nav>
     <a href="index.html">Home</a>
-    <a href="gallery.html">Photos</a>
+    <a href="gallery.html" class="active">Photos</a>
     <a href="videos.html">Videos</a>
     <a href="contact.html">Contact</a>
     <a href="booking.html">Booking</a>
     <a href="admin.html">Admin</a>
   </nav>
 </header>
+
 <div class="banner">
   <img src="images/banner.png" alt="Selvi Home Stay Rameshwaram">
 </div>
+
 <div class="container">
+  <h2>Photo Gallery</h2>
+  <p>View our comfortable rooms and serene surroundings.</p>
 
-<h2>Photo Gallery</h2>
-<p>View our comfortable rooms and serene surroundings.</p>
-<div class="gallery">
-  <img src="images/front-view.jpg" alt="Front View">
-  <img src="images/Main-Door.jpg" alt="Main Door">
-  <img src="images/Hall.jpg" alt="Main Hall">
-  <img src="images/Balcony.jpg" alt="Balcony">
-  <img src="images/2-Beds-Facility.jpg" alt="2 Beds Facility in Ground Floor">
-  <img src="images/3-Beds-Facility.jpg" alt="3 Beds Facility in First Floor">
-  <img src="images/Kitchen.jpg" alt="Kitchen">
- </div>
+  <div class="gallery">
+    <div class="gallery-item">
+      <img src="images/front-view.jpg" alt="Front View">
+      <h3>Front View</h3>
+    </div>
 
+    <div class="gallery-item">
+      <img src="images/Main-Door.jpg" alt="Main Door">
+      <h3>Main Door</h3>
+    </div>
+
+    <div class="gallery-item">
+      <img src="images/Hall.jpg" alt="Main Hall">
+      <h3>Main Hall</h3>
+    </div>
+
+    <div class="gallery-item">
+      <img src="images/Balcony.jpg" alt="Balcony">
+      <h3>Balcony</h3>
+    </div>
+
+    <div class="gallery-item">
+      <img src="images/2-Beds-Facility.jpg" alt="2 Beds Facility in Ground Floor">
+      <h3>2 Beds Facility in Ground Floor</h3>
+    </div>
+
+    <div class="gallery-item">
+      <img src="images/3-Beds-Facility.jpg" alt="3 Beds Facility in First Floor">
+      <h3>3 Beds Facility in First Floor</h3>
+    </div>
+
+    <div class="gallery-item">
+      <img src="images/Kitchen.jpg" alt="Kitchen">
+      <h3>Kitchen</h3>
+    </div>
+  </div>
 </div>
+
 <footer>© 2025 Selvi Home Stay | Designed by Premanandhan Narayanan</footer>
 </body>
 </html>
