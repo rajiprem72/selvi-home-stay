@@ -31,17 +31,32 @@
 <h2>Booking Form</h2>
 
 <form id="bookingForm">
-  <label>Name <input type="text" name="Name" required></label>
-  <label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
-  <label>Mobile Number <input type="text" name="Mobile" required></label>
-  <label>Address <textarea name="Address" rows="2" required></textarea></label>
+
+  <label>Name 
+    <input type="text" name="Name" placeholder="e.g. Suresh Kumar" required>
+  </label>
+
+  <label>Aadhaar Number 
+    <input type="text" name="Aadhaar" placeholder="e.g. 123412341234" required>
+  </label>
+
+  <label>Mobile Number 
+    <input type="text" name="Mobile" placeholder="e.g. +919123412345" required>
+  </label>
+
+  <label>Address 
+    <textarea name="Address" rows="2" placeholder="e.g. 12/3 Beach Road, Rameshwaram" required></textarea>
+  </label>
 
   <div class="form-row">
-    <label>From Date <input type="date" name="FromDate" required></label>
-    <label>To Date <input type="date" name="ToDate" required></label>
+    <label>From Date 
+      <input type="date" name="FromDate" required>
+    </label>
+    <label>To Date 
+      <input type="date" name="ToDate" required>
+    </label>
   </div>
 
-  <!-- 🔗 New Pay-Now link -->
   <p style="text-align:center; margin:12px 0;">
     <a href="#" onclick="openPaymentPopup(); return false;"
        style="color:#b45309; font-weight:600; text-decoration:underline;">
@@ -50,11 +65,17 @@
   </p>
 
   <div class="form-row">
-    <label>Payment Date <input type="date" name="PaymentDate" required></label>
-    <label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
+    <label>Payment Date 
+      <input type="date" name="PaymentDate" required>
+    </label>
+    <label>Payment Reference Number 
+      <input type="text" name="PaymentRefNo" placeholder="e.g. 1234567890123456" required>
+    </label>
   </div>
 
-  <label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
+  <label>Payment Amount (₹) 
+    <input type="number" name="PaymentAmount" placeholder="e.g. 1000" required>
+  </label>
 
   <button type="submit">Submit Booking</button>
 </form>
