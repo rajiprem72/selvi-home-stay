@@ -48,12 +48,19 @@
     <textarea name="Address" rows="2" placeholder="e.g. 12/3 Beach Road, Rameshwaram" required></textarea>
   </label>
 
+  <!-- FromDate as dropdown (populated from availability) -->
   <div class="form-row">
-    <label>From Date 
-      <input type="date" name="FromDate" required>
+    <label style="flex:1">From Date
+      <select name="FromDate" id="FromDate" required disabled>
+        <option value="">Loading available dates…</option>
+      </select>
     </label>
-    <label>To Date 
-      <input type="date" name="ToDate" required>
+
+    <!-- ToDate is disabled until FromDate is chosen -->
+    <label style="flex:1">To Date
+      <select name="ToDate" id="ToDate" required disabled>
+        <option value="">Select From Date first</option>
+      </select>
     </label>
   </div>
 
@@ -65,17 +72,30 @@
   </p>
 
   <div class="form-row">
-    <label>Payment Date 
-      <input type="date" name="PaymentDate" required>
+    <label style="flex:1">Payment Date 
+      <!-- readonly (not disabled) so it's submitted with the form -->
+      <input type="date" name="PaymentDate" id="PaymentDate" readonly required>
     </label>
-    <label>Payment Reference Number 
-      <input type="text" name="PaymentRefNo" placeholder="e.g. 1234567890123456" required>
-    </label>
+    <div style="flex:1; display:flex; align-items:center; font-size:0.9rem; color:#6b7280; padding-top:8px;">
+      If payment was made earlier, please mention the actual date in the <b style="margin:0 4px;">Message</b> box.
+    </div>
   </div>
+
+  <label>Payment Reference Number 
+    <input type="text" name="PaymentRefNo" placeholder="e.g. 1234567890123456" required>
+  </label>
 
   <label>Payment Amount (₹) 
     <input type="number" name="PaymentAmount" placeholder="e.g. 1000" required>
   </label>
+
+  <!-- Message LAST field -->
+  <label>Message
+    <textarea name="Message" id="Message" rows="3" placeholder="Any notes (e.g., earlier payment date, special requests)"></textarea>
+  </label>
+
+  <!-- Source fixed to Website -->
+  <input type="hidden" name="Source" value="Website">
 
   <button type="submit">Submit Booking</button>
 </form>
@@ -99,13 +119,187 @@ function openPaymentPopup() {
               `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes`);
 }
 
-/* === Booking form submission === */
+/* === Constants === */
 const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyR_12gz6TB_WX5-2X2iU7zQ_DkGzfFAW3SRdlxS-4xtK0R1MP4nfQJmqgmxNnsGkyybg/exec";
+const DAYS_WINDOW = 60;
+
+/* === Helpers === */
+const pad2 = n => (n < 10 ? '0' + n : '' + n);
+
+function toISODate(d) {
+  const y = d.getFullYear();
+  const m = pad2(d.getMonth() + 1);
+  const day = pad2(d.getDate());
+  return `${y}-${m}-${day}`;
+}
+
+function addDays(date, days) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function parseISODate(s) {
+  // s in YYYY-MM-DD
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/* Build a Set of blocked dates (each day that is already booked).
+   Booking ranges are treated as [FromDate, ToDate), i.e., checkout day is free. */
+function buildBlockedDateSet(bookings) {
+  const blocked = new Set();
+  bookings.forEach(b => {
+    const from = parseISODate(b.FromDate);
+    const to = parseISODate(b.ToDate);
+    // Guard: skip bad records
+    if (isNaN(from) || isNaN(to)) return;
+    for (let d = new Date(from); d < to; d.setDate(d.getDate() + 1)) {
+      blocked.add(toISODate(d));
+    }
+  });
+  return blocked;
+}
+
+function buildBlockedSortedArray(blockedSet) {
+  return Array.from(blockedSet).sort(); // YYYY-MM-DD sorts lexicographically correctly
+}
+
+/* Compute available FromDate options: today -> today + 60, excluding blocked dates. */
+function computeAvailableFromDates(blockedSet) {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const end = addDays(start, DAYS_WINDOW);
+
+  const options = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const key = toISODate(d);
+    if (!blockedSet.has(key)) {
+      options.push(key);
+    }
+  }
+  return options;
+}
+
+/* For a given FromDate, compute valid ToDate options:
+   start = FromDate + 1
+   end   = min(day before next blocked date, today + 60)
+*/
+function computeToDateOptions(fromISO, blockedSorted) {
+  const today = new Date();
+  const windowEnd = addDays(new Date(today.getFullYear(), today.getMonth(), today.getDate()), DAYS_WINDOW);
+
+  const start = addDays(parseISODate(fromISO), 1);
+
+  // Find the first blocked date strictly AFTER selected FromDate
+  let nextBlockedAfterFrom = null;
+  for (const iso of blockedSorted) {
+    if (iso > fromISO) { nextBlockedAfterFrom = iso; break; }
+  }
+
+  // End boundary is the day before next blocked date (if any), else windowEnd
+  let endBoundary = windowEnd;
+  if (nextBlockedAfterFrom) {
+    endBoundary = addDays(parseISODate(nextBlockedAfterFrom), -1);
+  }
+
+  // Build sequential list from start..endBoundary (inclusive)
+  const options = [];
+  for (let d = new Date(start); d <= endBoundary; d.setDate(d.getDate() + 1)) {
+    options.push(toISODate(d));
+  }
+  return options;
+}
+
+/* === Page init: set default PaymentDate and load availability === */
+(function init() {
+  // Default PaymentDate = today; keep it readonly, so it submits
+  const payInput = document.getElementById('PaymentDate');
+  const today = new Date();
+  payInput.value = toISODate(today);
+
+  loadAvailability();
+})();
+
+/* === Fetch bookings and populate FromDate dropdown === */
+async function loadAvailability() {
+  const fromEl = document.getElementById('FromDate');
+  const toEl = document.getElementById('ToDate');
+  try {
+    // Show loading state
+    fromEl.innerHTML = `<option value="">Loading available dates…</option>`;
+    fromEl.disabled = true;
+    toEl.innerHTML = `<option value="">Select From Date first</option>`;
+    toEl.disabled = true;
+
+    // GET bookings from Apps Script
+    const url = `${GS_WEBAPP_URL}?action=get_bookings`;
+    const res = await fetch(url, { method: 'GET' });
+    const json = await res.json();
+
+    // Expecting an array of { FromDate: 'YYYY-MM-DD', ToDate: 'YYYY-MM-DD', ... }
+    const bookings = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+    // Sort by FromDate ascending
+    bookings.sort((a, b) => (a.FromDate || '').localeCompare(b.FromDate || ''));
+
+    const blockedSet = buildBlockedDateSet(bookings);
+    const blockedSorted = buildBlockedSortedArray(blockedSet);
+    const availableFromDates = computeAvailableFromDates(blockedSet);
+
+    if (availableFromDates.length === 0) {
+      fromEl.innerHTML = `<option value="">No dates available in the next ${DAYS_WINDOW} days</option>`;
+      fromEl.disabled = true;
+      return;
+    }
+
+    // Populate FromDate dropdown
+    fromEl.innerHTML = `<option value="">Select a check-in date</option>` +
+      availableFromDates.map(d => `<option value="${d}">${d}</option>`).join('');
+    fromEl.disabled = false;
+
+    // When FromDate changes, prepare ToDate options
+    fromEl.addEventListener('change', () => {
+      const chosen = fromEl.value;
+      if (!chosen) {
+        toEl.innerHTML = `<option value="">Select From Date first</option>`;
+        toEl.disabled = true;
+        return;
+      }
+      const toOptions = computeToDateOptions(chosen, blockedSorted);
+      if (toOptions.length === 0) {
+        toEl.innerHTML = `<option value="">No valid To Date after ${chosen}</option>`;
+        toEl.disabled = true;
+        return;
+      }
+      toEl.innerHTML = `<option value="">Select your checkout date</option>` +
+        toOptions.map(d => `<option value="${d}">${d}</option>`).join('');
+      toEl.disabled = false;
+    });
+
+  } catch (err) {
+    // On error, keep FromDate disabled and show a message
+    console.error(err);
+    const msg = `Unable to load available dates. Please try again later.`;
+    document.getElementById('FromDate').innerHTML = `<option value="">${msg}</option>`;
+    document.getElementById('FromDate').disabled = true;
+  }
+}
+
+/* === Booking form submission === */
 document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target).entries());
+
+  // Safety: ensure ToDate is after FromDate
+  if (!data.FromDate || !data.ToDate || data.ToDate <= data.FromDate) {
+    document.getElementById('result').innerHTML =
+      `<div style='color:red'>Please choose a valid From Date and To Date.</div>`;
+    return;
+  }
+
   data.action = 'create_booking';
   data.Source = 'Website';
+
   const resDiv = document.getElementById('result');
   resDiv.textContent = 'Submitting...';
   try {
@@ -118,7 +312,17 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
     resDiv.innerHTML = json.error
       ? `<div style='color:red'>Error: ${json.error || 'Unknown'}</div>`
       : `<div style='color:green'>✅ Booking received! ID: <b>${json.bookingId || ''}</b></div>`;
-    if (!json.error) e.target.reset();
+    if (!json.error) {
+      // Reset only user-editable fields; keep PaymentDate as today
+      e.target.reset();
+      document.getElementById('PaymentDate').value = toISODate(new Date());
+      // Reload availability after a successful booking (to block newly booked dates)
+      loadAvailability();
+      // Disable ToDate until a new FromDate is selected
+      const toEl = document.getElementById('ToDate');
+      toEl.innerHTML = `<option value="">Select From Date first</option>`;
+      toEl.disabled = true;
+    }
   } catch(err) {
     resDiv.innerHTML = `<div style='color:red'>Error: ${err.message}</div>`;
   }
