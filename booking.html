@@ -48,7 +48,7 @@
     <textarea name="Address" rows="2" placeholder="e.g. 12/3 Beach Road, Rameshwaram" required></textarea>
   </label>
 
-  <!-- FromDate as dropdown (populated from availability) -->
+  <!-- FromDate / ToDate -->
   <div class="form-row">
     <label style="flex:1">From Date
       <select name="FromDate" id="FromDate" required disabled>
@@ -56,7 +56,6 @@
       </select>
     </label>
 
-    <!-- ToDate is disabled until FromDate is chosen -->
     <label style="flex:1">To Date
       <select name="ToDate" id="ToDate" required disabled>
         <option value="">Select From Date first</option>
@@ -64,7 +63,11 @@
     </label>
   </div>
 
-  <p style="text-align:center; margin:12px 0;">
+  <!-- Pricing breakdown appears right after dates -->
+  <div id="priceInfo" style="margin:8px 0 0 0; font-size:0.95rem; line-height:1.4;"></div>
+
+  <!-- Pay link appears AFTER price breakdown -->
+  <p id="payLinkP" style="text-align:center; margin:12px 0; display:none;">
     <a href="#" onclick="openPaymentPopup(); return false;"
        style="color:#b45309; font-weight:600; text-decoration:underline;">
        💰 Click here to Pay for Selvi Home Stay
@@ -73,6 +76,7 @@
 
   <div class="form-row">
     <label style="flex:1">Payment Date 
+      <!-- readonly so it's included in submit -->
       <input type="date" name="PaymentDate" id="PaymentDate" readonly required>
     </label>
     <div style="flex:1; display:flex; align-items:center; font-size:0.9rem; color:#6b7280; padding-top:8px;">
@@ -88,11 +92,26 @@
     <input type="number" name="PaymentAmount" placeholder="e.g. 1000" required>
   </label>
 
+  <!-- Members (required) -->
+  <div class="form-row" style="align-items:flex-end;">
+    <label style="flex:1">Members
+      <select name="Members" id="Members" required>
+        <option value="">Select Members (3–10)</option>
+        <option>3</option><option>4</option><option>5</option><option>6</option>
+        <option>7</option><option>8</option><option>9</option><option>10</option>
+      </select>
+    </label>
+    <div style="flex:1; padding:6px 8px; color:#6b7280; font-size:0.9rem;">
+      Maximum <b>8 Adults + 2 Children</b>.
+    </div>
+  </div>
+
   <!-- Message LAST field -->
   <label>Message
     <textarea name="Message" id="Message" rows="3" placeholder="Any notes (e.g., earlier payment date, special requests)"></textarea>
   </label>
 
+  <!-- Source fixed -->
   <input type="hidden" name="Source" value="Website">
 
   <button type="submit">Submit Booking</button>
@@ -108,6 +127,7 @@
 </footer>
 
 <script>
+/* === Open payment page in centered popup === */
 function openPaymentPopup() {
   const w = 480, h = 650;
   const left = (screen.width / 2) - (w / 2);
@@ -116,26 +136,33 @@ function openPaymentPopup() {
               `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes`);
 }
 
+/* === Constants === */
 const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyp7pM3ovAoo1aJ_Sun7O1hfuPVMzlzoKvLq6p8Z0jyTmCJGwDfU4BVOM0Di7l9rIuP/exec";
 const DAYS_WINDOW = 60;
 
+/* === Rates (fetched from backend) === */
+let RATE_PER_DAY = null;   // from Rates!B1
+let GST_PERCENT  = null;   // from Rates!B2
+let BASE_PER_DAY = null;   // from Rates!B3 (advance)
+
+/* === Helpers === */
 const pad2 = n => (n < 10 ? '0' + n : '' + n);
+const inr = new Intl.NumberFormat('en-IN');
 
 function toISODate(d) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
-
 function addDays(date, days) {
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   d.setDate(d.getDate() + days);
   return d;
 }
-
 function parseISODate(s) {
   const [y, m, d] = s.split('-').map(Number);
   return new Date(y, m - 1, d);
 }
 
+/* Build Set of blocked dates (booked nights: [From, To) ) */
 function buildBlockedDateSet(bookings) {
   const blocked = new Set();
   bookings.forEach(b => {
@@ -148,11 +175,9 @@ function buildBlockedDateSet(bookings) {
   });
   return blocked;
 }
-
 function buildBlockedSortedArray(blockedSet) {
   return Array.from(blockedSet).sort();
 }
-
 function computeAvailableFromDates(blockedSet) {
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -160,30 +185,25 @@ function computeAvailableFromDates(blockedSet) {
   const options = [];
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const key = toISODate(d);
-    if (!blockedSet.has(key)) {
-      options.push(key);
-    }
+    if (!blockedSet.has(key)) options.push(key);
   }
   return options;
 }
 
-/** ✅ FIXED FUNCTION BELOW **/
+/* ✅ ToDate options: allow checkout ON next FromDate (inclusive) */
 function computeToDateOptions(fromISO, blockedSorted) {
   const today = new Date();
   const windowEnd = addDays(new Date(today.getFullYear(), today.getMonth(), today.getDate()), DAYS_WINDOW);
-
   const start = addDays(parseISODate(fromISO), 1);
+
   let nextFrom = null;
   for (const iso of blockedSorted) {
-    if (iso > fromISO) {
-      nextFrom = iso;
-      break;
-    }
+    if (iso > fromISO) { nextFrom = iso; break; }
   }
 
   let endBoundary = windowEnd;
   if (nextFrom) {
-    const candidate = parseISODate(nextFrom);
+    const candidate = parseISODate(nextFrom); // inclusive
     if (candidate < endBoundary) endBoundary = candidate;
   }
 
@@ -194,12 +214,77 @@ function computeToDateOptions(fromISO, blockedSorted) {
   return options;
 }
 
+/* Nights between two ISO dates */
+function nightsBetween(fromISO, toISO) {
+  const f = parseISODate(fromISO);
+  const t = parseISODate(toISO);
+  return Math.max(0, Math.round((t - f) / (1000*60*60*24)));
+}
+
+/* Price breakdown UI */
+function renderPrice(fromISO, toISO) {
+  const priceDiv = document.getElementById('priceInfo');
+  const payLinkP = document.getElementById('payLinkP');
+  priceDiv.innerHTML = '';
+  payLinkP.style.display = 'none';
+
+  if (!fromISO || !toISO) return;
+  const nights = nightsBetween(fromISO, toISO);
+  if (nights <= 0) return;
+
+  // fallback safe defaults if rates not fetched
+  const rate = Number(RATE_PER_DAY ?? 0);
+  const gst  = Number(GST_PERCENT  ?? 0);
+  const base = Number(BASE_PER_DAY ?? 1000);
+
+  const gstPerDay = Math.round((rate * gst) / 100);
+  const totalPerDay = rate + gstPerDay;
+
+  const advanceTotal = base * nights;
+  const fullTotal = totalPerDay * nights;
+
+  // Build breakdown HTML
+  const lines = [];
+  lines.push(`<div><b>Stay Duration:</b> ${nights} night${nights>1?'s':''}</div>`);
+  if (rate && gst) {
+    lines.push(`<div style="margin-top:6px;"><b>Full Payment (per day):</b> ₹${inr.format(rate)} + GST ${gst}% (₹${inr.format(gstPerDay)}) = <b>₹${inr.format(totalPerDay)}</b></div>`);
+    lines.push(`<div><b>Full Total (${nights} night${nights>1?'s':''}):</b> ₹${inr.format(fullTotal)}</div>`);
+  } else {
+    lines.push(`<div style="margin-top:6px; color:#9ca3af;">Rates temporarily unavailable; contact us for full amount.</div>`);
+  }
+  lines.push(`<div style="margin-top:6px;"><b>Advance Option:</b> ₹${inr.format(base)} × ${nights} = <b>₹${inr.format(advanceTotal)}</b></div>`);
+
+  priceDiv.innerHTML = lines.join('');
+  payLinkP.style.display = 'block';
+}
+
+/* === Init === */
 (function init() {
   const payInput = document.getElementById('PaymentDate');
   payInput.value = toISODate(new Date());
-  loadAvailability();
+  loadRates().finally(loadAvailability);
 })();
 
+/* === Fetch Rates once === */
+async function loadRates() {
+  try {
+    const res = await fetch(`${GS_WEBAPP_URL}?action=get_rates`);
+    const json = await res.json();
+    if (json && typeof json.ratePerDay !== 'undefined') {
+      RATE_PER_DAY = Number(json.ratePerDay);
+      GST_PERCENT  = Number(json.gstPercent);
+      BASE_PER_DAY = Number(json.basePerDay);
+    } else {
+      // fallback; still allow UI to work
+      BASE_PER_DAY = 1000;
+    }
+  } catch (e) {
+    console.warn('Unable to load rates:', e);
+    BASE_PER_DAY = 1000;
+  }
+}
+
+/* === Fetch bookings and populate FromDate dropdown === */
 async function loadAvailability() {
   const fromEl = document.getElementById('FromDate');
   const toEl = document.getElementById('ToDate');
@@ -232,6 +317,9 @@ async function loadAvailability() {
 
     fromEl.addEventListener('change', () => {
       const chosen = fromEl.value;
+      document.getElementById('priceInfo').innerHTML = '';
+      document.getElementById('payLinkP').style.display = 'none';
+
       if (!chosen) {
         toEl.innerHTML = `<option value="">Select From Date first</option>`;
         toEl.disabled = true;
@@ -248,6 +336,12 @@ async function loadAvailability() {
       toEl.disabled = false;
     });
 
+    toEl.addEventListener('change', () => {
+      const fromISO = fromEl.value;
+      const toISO = toEl.value;
+      renderPrice(fromISO, toISO);
+    });
+
   } catch (err) {
     console.error(err);
     fromEl.innerHTML = `<option value="">Unable to load dates</option>`;
@@ -255,13 +349,22 @@ async function loadAvailability() {
   }
 }
 
+/* === Booking form submission === */
 document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target).entries());
 
+  // Validate dates
   if (!data.FromDate || !data.ToDate || data.ToDate <= data.FromDate) {
     document.getElementById('result').innerHTML =
       `<div style='color:red'>Please choose a valid From Date and To Date.</div>`;
+    return;
+  }
+  // Validate Members 3–10
+  const members = Number(data.Members);
+  if (!members || members < 3 || members > 10) {
+    document.getElementById('result').innerHTML =
+      `<div style='color:red'>Please select Members between 3 and 10.</div>`;
     return;
   }
 
@@ -276,10 +379,14 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(data)
     });
-    const json = await res.json();
+    // Note: if your backend handles POST via doGet, it will still return JSON here
+    const txt = await res.text();
+    let json;
+    try { json = JSON.parse(txt); } catch { json = { error: 'Invalid server response', raw: txt }; }
+
     resDiv.innerHTML = json.error
       ? `<div style='color:red'>Error: ${json.error}</div>`
-      : `<div style='color:green'>✅ Booking received! ID: <b>${json.bookingId}</b></div>`;
+      : `<div style='color:green'>✅ Booking received! ID: <b>${json.bookingId || ''}</b></div>`;
     if (!json.error) {
       e.target.reset();
       document.getElementById('PaymentDate').value = toISODate(new Date());
@@ -287,6 +394,8 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
       const toEl = document.getElementById('ToDate');
       toEl.innerHTML = `<option value="">Select From Date first</option>`;
       toEl.disabled = true;
+      document.getElementById('priceInfo').innerHTML = '';
+      document.getElementById('payLinkP').style.display = 'none';
     }
   } catch(err) {
     resDiv.innerHTML = `<div style='color:red'>Error: ${err.message}</div>`;
