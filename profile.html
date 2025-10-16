@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Digital Contact</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      display: inline-block;
+      background: #f9f9f9;
+    }
+    img {
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+    }
+    .info { margin-top: 10px; }
+    button {
+      background: #0b5cff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 15px;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <img src="images/favicon.png" alt="Profile Photo">
+    <div class="info">
+      <h2>Selvi Home Stay A/c</h2>
+      <p>Rameshwaram</p>
+      <p>📞 +91-98945 35526</p>
+      <p>📞 +91-91235 28734</p>
+      <p>✉️ selvihomestay@gmail.com</p>
+      <p>🌐 <a href="selvi-home-stay.in">Selvi Home Stay</a></p>
+      <p>📍 A/C, 79-A, S.K Patti, Near by Rameshwaram Temple & Agni Theertham; Rameshwaram; Tamil Nadu; Pin Code- 623526;India</p>
+    </div>
+    <a id="downloadLink" href="mycard.vcf" download="selvi_home_stay.vcf">
+      <button id="addBtn">Add Contact</button>
+    </a>
+  </div>
+
+  <script>
+    // Disable Add Contact button on desktop
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    window.onload = function() {
+      const addBtn = document.getElementById("addBtn");
+      if (!isMobile()) {
+        addBtn.disabled = true;
+      }
+    }
+  </script>
+
+</body>
+</html>
