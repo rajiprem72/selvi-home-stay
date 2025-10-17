@@ -28,9 +28,7 @@
 
 <h2>Selvi Home Stay</h2>
 
-<div id="adminSection" style="display:none">
 <h3>Site Map</h3>
-<form id="adminForm">
 <label><a href="index.html">Our Home Page</a></label>
 <label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
 <label>Mobile Number <input type="text" name="Mobile" required></label>
@@ -45,29 +43,7 @@
 </div>
 <label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
 <button type="submit">Add Booking</button>
-</form>
-<div id="result"></div>
-</div>
-<script>
-  const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw2vQtjD6maNQJtbrvTBaJjvbmgrkPfYj5RZE1BHzXPwhGKbFq8HL7R4xKsBNFeqLhp8w/exec";
-  document.getElementById('adminForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  data.action = 'admin_booking';
-  data.Source = 'Admin';
-  data.admin_password = 'SELVI@2025';
-  const resDiv = document.getElementById('result');
-  resDiv.textContent = 'Processing...';
-  try {
-    const res = await fetch(GS_WEBAPP_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    const json = await res.json();
-    resDiv.innerHTML = json.error ? "<div style='color:red'>Error: " + (json.error||'Unknown') + "</div>" : "<div style='color:green'>✅ Booking added! ID: <b>" + (json.bookingId||'') + "</b></div>";
-    if(!json.error) e.target.reset();
-  } catch(err) { resDiv.innerHTML = "<div style='color:red'>Error: " + err.message + "</div>"; }
-});
-</script>
 
-</div>
 <footer>© 2025 Selvi Home Stay <br> Designed by <br> Premanandhan Narayanan<br> WhatsApp +91 98844 86609</footer>
 </body>
 </html>
