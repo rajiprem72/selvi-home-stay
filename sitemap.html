@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — Selvi Home Stay</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<header>
+  <h1>Selvi Home Stay</h1>
+  <div class="menu-toggle"><span></span><span></span><span></span></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Photos</a>
+    <a href="videos.html">Videos</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://script.google.com/macros/s/AKfycbwJdZz6sARjTvWNx-AcBhmCldkY6ZCgnwgOTRz1NsHkestNp72PsPb8n-GoOpaAu5aU/exec">Booking</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
+<div class="banner">
+  <img src="images/banner.jpg" alt="Selvi Home Stay Rameshwaram">
+ </div>
+<div class="container">
+
+<h2>Selvi Home Stay</h2>
+
+<div id="adminSection" style="display:none">
+<h3>Site Map</h3>
+<form id="adminForm">
+<label><a href="index.html">Our Home Page</a></label>
+<label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
+<label>Mobile Number <input type="text" name="Mobile" required></label>
+<label>Address <textarea name="Address" rows="2" required></textarea></label>
+<div class="form-row">
+<label>From Date <input type="date" name="FromDate" required></label>
+<label>To Date <input type="date" name="ToDate" required></label>
+</div>
+<div class="form-row">
+<label>Payment Date <input type="date" name="PaymentDate" required></label>
+<label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
+</div>
+<label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
+<button type="submit">Add Booking</button>
+</form>
+<div id="result"></div>
+</div>
+<script>
+  const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw2vQtjD6maNQJtbrvTBaJjvbmgrkPfYj5RZE1BHzXPwhGKbFq8HL7R4xKsBNFeqLhp8w/exec";
+  document.getElementById('adminForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  data.action = 'admin_booking';
+  data.Source = 'Admin';
+  data.admin_password = 'SELVI@2025';
+  const resDiv = document.getElementById('result');
+  resDiv.textContent = 'Processing...';
+  try {
+    const res = await fetch(GS_WEBAPP_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const json = await res.json();
+    resDiv.innerHTML = json.error ? "<div style='color:red'>Error: " + (json.error||'Unknown') + "</div>" : "<div style='color:green'>✅ Booking added! ID: <b>" + (json.bookingId||'') + "</b></div>";
+    if(!json.error) e.target.reset();
+  } catch(err) { resDiv.innerHTML = "<div style='color:red'>Error: " + err.message + "</div>"; }
+});
+</script>
+
+</div>
+<footer>© 2025 Selvi Home Stay <br> Designed by <br> Premanandhan Narayanan<br> WhatsApp +91 98844 86609</footer>
+</body>
+</html>
