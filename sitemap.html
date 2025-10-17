@@ -6,8 +6,53 @@
 <title>Site Map — Selvi Home Stay</title>
 <link rel="icon" type="image/png" href="images/favicon.png">
 <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
+
+<style>
+  /* Sitemap Page Styling */
+  .sitemap-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .sitemap-title {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+
+  .sitemap-subtitle {
+    text-align: center;
+    color: #555;
+    margin-bottom: 30px;
+    font-size: 1rem;
+  }
+
+  .sitemap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+  }
+
+  .sitemap-item a {
+    display: block;
+    padding: 15px;
+    background: #f4f4f4;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #333;
+    transition: 0.3s;
+    border: 1px solid #ddd;
+  }
+
+  .sitemap-item a:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+  }
+</style>
 </head>
+
 <body>
 <header>
   <h1>Selvi Home Stay</h1>
@@ -18,19 +63,34 @@
     <a href="videos.html">Videos</a>
     <a href="contact.html">Contact</a>
     <a href="https://script.google.com/macros/s/AKfycbwJdZz6sARjTvWNx-AcBhmCldkY6ZCgnwgOTRz1NsHkestNp72PsPb8n-GoOpaAu5aU/exec">Booking</a>
-    <a href="admin.html">Admin</a>
+    <a href="sitemap.html" class="active">Site Map</a>
   </nav>
 </header>
+
 <div class="banner">
   <img src="images/banner.jpg" alt="Selvi Home Stay Rameshwaram">
- </div>
-<div class="container">
+</div>
 
-<h2>Selvi Home Stay</h2>
+<div class="container sitemap-container">
+  <h2 class="sitemap-title">Explore Our Website</h2>
+  <p class="sitemap-subtitle">Quick access to all public pages of Selvi Home Stay</p>
 
-<h3>Site Map</h3>
-<label><a href="index.html">Our Home Page</a></label>
+  <div class="sitemap-grid">
+    <div class="sitemap-item"><a href="index.html">🏠 Home Page</a></div>
+    <div class="sitemap-item"><a href="gallery.html">🖼 Photo Gallery</a></div>
+    <div class="sitemap-item"><a href="videos.html">🎥 Video Gallery</a></div>
+    <div class="sitemap-item"><a href="places.html">📍 Places of Visit</a></div>
+    <div class="sitemap-item"><a href="https://script.google.com/macros/s/AKfycbwJdZz6sARjTvWNx-AcBhmCldkY6ZCgnwgOTRz1NsHkestNp72PsPb8n-GoOpaAu5aU/exec">🛏 Booking Page</a></div>
+    <div class="sitemap-item"><a href="profile.html">💳 Digital Visiting Card</a></div>
+    <div class="sitemap-item"><a href="contact.html">☎ Contact Us</a></div>
+    <div class="sitemap-item"><a href="sitemap.html">🗺 Site Map (You are here)</a></div>
+  </div>
+</div>
 
-<footer>© 2025 Selvi Home Stay <br> Designed by <br> Premanandhan Narayanan<br> WhatsApp +91 98844 86609</footer>
+<footer>
+  © 2025 Selvi Home Stay <br>
+  Designed by <br> Premanandhan Narayanan <br>
+  WhatsApp +91 98844 86609
+</footer>
 </body>
 </html>
