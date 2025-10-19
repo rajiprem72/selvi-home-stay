@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Booking — Selvi Home Stay</title>
 
-<!-- Your live assets -->
 <link rel="icon" type="image/png" href="https://selvi-home-stay.in/images/favicon.png">
 <link rel="stylesheet" href="https://selvi-home-stay.in/style.css">
 
@@ -51,12 +50,13 @@
 
 <form id="bookingForm"
       method="POST"
-      action="https://script.google.com/macros/s/AKfycbwpLpo44p_mtIsIsRsMD_zjQohfWUGZ2F9WzrSGnfMd8W-36r-5W_U9Bvi2yjXHZ1AJ/exec">
+      action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec"
+      target="SelviSHSSubmitWin">
 
   <!-- For backend routing -->
   <input type="hidden" name="action" value="create_booking">
   <input type="hidden" name="Source" value="Website">
-  <!-- Will add return=json at submit time -->
+  <!-- Added at runtime: return=postMessage -->
 
   <label>Name 
     <input type="text" name="Name" placeholder="e.g. Name as in Aadhaar Card" required>
@@ -146,7 +146,7 @@
 
   <button id="submitBtn" type="submit" class="btn">Submit Booking</button>
 
-  <!-- Confirmation area (same-page success) -->
+  <!-- Same-page confirmation -->
   <div id="confirmationArea"></div>
 </form>
 </div>
@@ -159,7 +159,7 @@
 
 <script>
 /* ========= Config ========= */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyp8VM4tF5JjuEuqEwlSdzAb1sKMhRGE7VO-a6Mrv7izVZY7yAe3_2tXUN6f7udnkRf/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
 const DAYS_WINDOW = 60;
 
 /* ========= Helpers ========= */
@@ -240,7 +240,6 @@ function showPrice(fromISO,toISO){
 
 /* ========= Init: set PaymentDate, then load rates + availability ========= */
 (async function init(){
-  // default PaymentDate = today
   document.getElementById('PaymentDate').value = toISODate(new Date());
 
   const fromEl = document.getElementById('FromDate');
@@ -304,70 +303,83 @@ function showPrice(fromISO,toISO){
   }
 })();
 
-/* ========= SAME-PAGE SUBMISSION (fetch + JSON) ========= */
-(function setupSubmit(){
+/* ========= POPUP SUBMISSION + SAME-PAGE CONFIRM ========= */
+(function setupPopupSubmit(){
   const form = document.getElementById('bookingForm');
   const submitBtn = document.getElementById('submitBtn');
   const confirmationArea = document.getElementById('confirmationArea');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // stay on same page
+  let popupRef = null;
+
+  // Listen for success message from popup (server page posts this)
+  window.addEventListener('message', (event) => {
+    const data = event.data || {};
+    if (!data || typeof data !== 'object') return;
+    if (!('success' in data)) return;
+
+    if (data.success) {
+      // Disable entire form & show success
+      disableForm(form);
+      confirmationArea.className = 'notice-success';
+      confirmationArea.innerHTML =
+        `<div>✅ <b>Booking Confirmed!</b></div>
+         <div>Your Booking ID: <b>${data.bookingId}</b></div>
+         <div>We will contact you via Phone / WhatsApp / Email.</div>`;
+      confirmationArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Close popup if possible
+      try { popupRef && popupRef.close && popupRef.close(); } catch(_) {}
+    } else {
+      confirmationArea.className = 'notice-error';
+      confirmationArea.textContent = `Error: ${data.error || 'Unknown error'}`;
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Booking";
+      try { popupRef && popupRef.focus && popupRef.focus(); } catch(_) {}
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // validations (Members 3–10, ToDate > FromDate)
+    const fd = new FormData(form);
+    const from = fd.get('FromDate') || '';
+    const to = fd.get('ToDate') || '';
+    const members = Number(fd.get('Members') || 0);
+
+    if (!from || !to || to <= from) {
+      alert('Please choose a valid From Date and To Date.');
+      return;
+    }
+    if (!members || members < 3 || members > 10) {
+      alert('Please select Members between 3 and 10.');
+      return;
+    }
+
+    // Add return=postMessage so backend returns a page that calls window.opener.postMessage(...)
+    const existing = form.querySelector('input[name="return"]');
+    if (!existing) {
+      const r = document.createElement('input');
+      r.type = 'hidden';
+      r.name = 'return';
+      r.value = 'postMessage';
+      form.appendChild(r);
+    } else {
+      existing.value = 'postMessage';
+    }
+
+    // Open popup BEFORE submit to avoid popup blockers
+    const w = 520, h = 640;
+    const left = (screen.width / 2) - (w / 2);
+    const top  = (screen.height / 2) - (h / 2);
+    popupRef = window.open('about:blank', 'SelviSHSSubmitWin',
+      `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes`);
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting…";
 
-    try {
-      // Build URL-encoded body to avoid CORS preflight
-      const fd = new FormData(form);
-      fd.set('return', 'json'); // <- tell backend to return JSON
-      // Extra client-side safety check for dates
-      const from = fd.get('FromDate') || '';
-      const to   = fd.get('ToDate') || '';
-      if (!from || !to || to <= from) {
-        throw new Error('Please choose a valid From Date and To Date.');
-      }
-      // Also ensure Members is between 3 and 10
-      const members = Number(fd.get('Members') || 0);
-      if (!members || members < 3 || members > 10) {
-        throw new Error('Please select Members between 3 and 10.');
-      }
-
-      const body = new URLSearchParams();
-      for (const [k,v] of fd.entries()) body.append(k, v);
-
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body
-      });
-
-      // If backend accidentally returned HTML, try to parse JSON anyway
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = {}; }
-
-      if (data && data.success) {
-        // Disable entire form & show success
-        disableForm(form);
-        confirmationArea.className = 'notice-success';
-        confirmationArea.innerHTML =
-          `<div>✅ <b>Booking Confirmed!</b></div>
-           <div>Your Booking ID: <b>${data.bookingId}</b></div>
-           <div>We will contact you via Phone / WhatsApp / Email.</div>`;
-        confirmationArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        // Show error, re-enable submit
-        const msg = (data && data.error) ? data.error : 'Failed to submit. Please try again.';
-        confirmationArea.className = 'notice-error';
-        confirmationArea.textContent = `Error: ${msg}`;
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Booking";
-      }
-    } catch (err) {
-      confirmationArea.className = 'notice-error';
-      confirmationArea.textContent = `Error: ${err.message || err}`;
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Booking";
-    }
+    // Now do the real POST into that popup
+    form.submit();
   });
 })();
 </script>
