@@ -51,6 +51,18 @@
     transform: translateY(-2px);
   }
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+        .catch(err => console.log('❌ Service Worker registration failed:', err));
+    });
+  }
+</script>
+
 </head>
 
 <body>
