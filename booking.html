@@ -326,7 +326,7 @@ function showPrice(fromISO,toISO){
         `<div>✅ <b>Booking Confirmed!</b></div>
          <div>Your Booking ID: <b>${data.bookingId}</b></div>
          <div>We will contact you via Phone / WhatsApp / Email.</div>`;
-      confirmationArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      //confirmationArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
       // Close popup if possible
       try { popupRef && popupRef.close && popupRef.close(); } catch(_) {}
