@@ -1,33 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Home — Selvi Home Stay</title>
-<link rel="icon" type="image/png" href="images/favicon.png">
-<link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0f172a">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('✅ Service Worker registered:', reg.scope))
-        .catch(err => console.log('❌ Service Worker registration failed:', err));
-    });
-  }
-</script>
-<head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Booking — Selvi Home Stay</title>
+  <title>Home — Selvi Home Stay</title>
 
   <!-- favicon and css -->
-  <link rel="icon" type="image/png" href="https://selvi-home-stay.in/images/favicon.png">
-  <link rel="stylesheet" href="https://selvi-home-stay.in/style.css">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="stylesheet" href="style.css">
 
-  <!-- ✅ ADD THE UPDATED META PIXEL CODE HERE -->
   <!-- Meta Pixel Code (manual load version) -->
   <script async src="https://connect.facebook.net/en_US/fbevents.js"></script>
   <script>
@@ -59,11 +40,10 @@
   </noscript>
   <!-- End Meta Pixel Code -->
 
-  <!-- manifest and theme -->
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#0f172a">
 
-  <!-- service worker script -->
+  <!-- service worker registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -73,6 +53,9 @@
       });
     }
   </script>
+
+  <!-- main script (deferred) -->
+  <script src="script.js" defer></script>
 </head>
 <body>
 <header>
@@ -89,32 +72,39 @@
     <a href="testimonials.html">Testimonials</a>
   </nav>
 </header>
+
 <div class="banner">
   <img src="images/banner.jpg" alt="Selvi Home Stay Rameshwaram">
 </div>
+
 <div class="container">
+  <h2>Welcome to Selvi Home Stay 🌊</h2>
+  <p>Located just a few minutes from the ocean and Rameshwaram Temple, Selvi Home Stay offers comfortable lodging for families with flexible cooking facilities and divine tranquility.</p>
 
-<h2>Welcome to Selvi Home Stay 🌊</h2>
-<p>Located just a few minutes from the ocean and Rameshwaram Temple, Selvi Home Stay offers comfortable lodging for families with flexible cooking facilities and divine tranquility.</p>
-<h3>Salient Features</h3>
-<ul>
-<li>maximum of 8 Adults and 2 children can stay in our premises</li>
-<li>Guests can cook their own food (Induction stove provided — bring your own utensils).</li>
-<li>20 litres of drinking water provided per stay.</li>
-<li>Free Wi-Fi.</li>
-<li>Pickup and drop from Railway Station.</li>  
-<li><a href="places.html">Sightseeing arrangement.</a></li>
-<li>Two-wheeler rental available.</li>  
-<li>Commercial 2-wheeler and car parking facility coming soon.</li>
-</ul>
-<h3>Practical Info</h3>
-<ul>
-<li>Check-in: 12:00 noon | Check-out: 11:00 AM next day</li>
-<li>Ocean: 5–10 min walk | Rameshwaram Temple: 20–30 min walk</li>
-</ul>
-<p class="small-muted">Rate: ₹3600/day + GST. Family-friendly (8 adults + 2 kids). Two floors: Ground (2 beds), First (3 beds with attached bathroom).</p>
+  <h3>Salient Features</h3>
+  <ul>
+    <li>Maximum of 8 Adults and 2 children can stay in our premises</li>
+    <li>Guests can cook their own food (Induction stove provided — bring your own utensils).</li>
+    <li>20 litres of drinking water provided per stay.</li>
+    <li>Free Wi-Fi.</li>
+    <li>Pickup and drop from Railway Station.</li>  
+    <li><a href="places.html">Sightseeing arrangement.</a></li>
+    <li>Two-wheeler rental available.</li>  
+    <li>Commercial 2-wheeler and car parking facility coming soon.</li>
+  </ul>
 
+  <h3>Practical Info</h3>
+  <ul>
+    <li>Check-in: 12:00 noon | Check-out: 11:00 AM next day</li>
+    <li>Ocean: 5–10 min walk | Rameshwaram Temple: 20–30 min walk</li>
+  </ul>
+
+  <p class="small-muted">Rate: ₹4,760/day + GST. Family-friendly (8 adults + 2 kids). Two floors: Ground (2 beds), First (3 beds with attached bathroom).</p>
 </div>
-<footer>© 2025 Selvi Home Stay <br> Designed by <br>Premanandhan Narayanan<br> WhatsApp +91 98844 86609</footer>
+
+<footer>
+  © 2025 Selvi Home Stay <br>
+  Designed by <br>Premanandhan Narayanan<br> WhatsApp +91 98844 86609
+</footer>
 </body>
 </html>
