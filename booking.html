@@ -339,6 +339,11 @@ function showPrice(fromISO,toISO){
          <div>Your Booking ID: <b>${data.bookingId}</b></div>
          <div>We will contact you via Phone / WhatsApp / Email.</div>`;
       //confirmationArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 🔹 Fire Facebook Lead Event
+    if (typeof fbq === 'function') {
+      fbq('track', 'Lead');
+      console.log('📈 Facebook Lead event fired');
+    }
 
       // Close popup if possible
       try { popupRef && popupRef.close && popupRef.close(); } catch(_) {}
