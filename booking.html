@@ -35,7 +35,63 @@
     });
   }
 </script>
-<!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js'); fbq('init', '793878913410553'); fbq('track', 'PageView');</script><noscript> <img height="1" width="1" src="https://www.facebook.com/tr?id=793878913410553&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Booking — Selvi Home Stay</title>
+
+  <!-- favicon and css -->
+  <link rel="icon" type="image/png" href="https://selvi-home-stay.in/images/favicon.png">
+  <link rel="stylesheet" href="https://selvi-home-stay.in/style.css">
+
+  <!-- ✅ ADD THE UPDATED META PIXEL CODE HERE -->
+  <!-- Meta Pixel Code (manual load version) -->
+  <script async src="https://connect.facebook.net/en_US/fbevents.js"></script>
+  <script>
+    // Wait until fbq library exists, then initialize
+    function initFBPixel() {
+      if (typeof fbq === 'function') {
+        fbq('init', '793878913410553');
+        fbq('track', 'PageView');
+        console.log('✅ Meta Pixel initialized manually');
+      } else {
+        console.warn('⏳ Waiting for fbq to load...');
+        setTimeout(initFBPixel, 500);
+      }
+    }
+
+    // Create fbq placeholder before library loads
+    window.fbq = window.fbq || function() {
+      (window.fbq.callMethod ?
+        window.fbq.callMethod.apply(window.fbq, arguments) : window.fbq.queue.push(arguments));
+    };
+    window.fbq.queue = [];
+
+    // Kick off initialization after DOM ready
+    document.addEventListener('DOMContentLoaded', initFBPixel);
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=793878913410553&ev=PageView&noscript=1"/>
+  </noscript>
+  <!-- End Meta Pixel Code -->
+
+  <!-- manifest and theme -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- service worker script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+          .catch(err => console.log('❌ Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</head>
+
 </head>
 
 <body>
