@@ -287,8 +287,6 @@ function showPrice(fromISO, toISO) {
   } catch(e){ console.error('Failed to load dates', e); }
 })();
 
-// ✅ Popup submission flow
-<!-- ✅ Popup submission flow -->
 <script>
 (function setupBookingFlow() {
   const form = document.getElementById('bookingForm');
@@ -329,8 +327,8 @@ function showPrice(fromISO, toISO) {
 })();
 </script>
 
-  
-  /* ✅ Replace the old handler with this safe version */
+<!-- ✅ Safe Message Listener -->
+<script>
 (function secureMessageListener() {
   const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
 
