@@ -34,11 +34,9 @@
       fbq('track', 'PageView');
       console.log('✅ Meta Pixel initialized manually');
     } else {
-      console.warn('⏳ Waiting for fbq to load...');
       setTimeout(initFBPixel, 500);
     }
   }
-
   window.fbq = window.fbq || function() {
     (window.fbq.callMethod ?
       window.fbq.callMethod.apply(window.fbq, arguments) : window.fbq.queue.push(arguments));
@@ -48,12 +46,14 @@
 </script>
 <noscript>
   <img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=793878913410553&ev=PageView&noscript=1"/>
+  src="https://www.facebook.com/tr?id=793878913410553&ev=PageView&noscript=1"/>
 </noscript>
 <!-- ✅ End Meta Pixel Code -->
 
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0f172a">
+
+<!-- ✅ Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
@@ -68,6 +68,7 @@
 <body>
 <header>
   <h1>Selvi Home Stay</h1>
+  <div class="menu-toggle"><span></span><span></span><span></span></div>
   <nav>
     <a href="index.html">Home</a>
     <a href="gallery.html">Photos</a>
@@ -89,14 +90,24 @@
 
 <form id="bookingForm" method="POST"
   action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec">
-
   <input type="hidden" name="action" value="create_booking">
   <input type="hidden" name="Source" value="Website">
 
-  <label>Name <input type="text" name="Name" required></label>
-  <label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
-  <label>Mobile Number <input type="text" name="Mobile" required></label>
-  <label>Address <textarea name="Address" rows="2" required></textarea></label>
+  <label>Name 
+    <input type="text" name="Name" placeholder="e.g. Name as in Aadhaar Card" required>
+  </label>
+
+  <label>Aadhaar Number 
+    <input type="text" name="Aadhaar" placeholder="e.g. 123412341234" required>
+  </label>
+
+  <label>Mobile Number 
+    <input type="text" name="Mobile" placeholder="e.g. 9123412345" required>
+  </label>
+
+  <label>Address 
+    <textarea name="Address" rows="2" placeholder="e.g. 12/3 Beach Road, Chennai, Tamil Nadu" required></textarea>
+  </label>
 
   <div class="form-row">
     <label style="flex:1">From Date
@@ -104,7 +115,6 @@
         <option value="">Loading available dates…</option>
       </select>
     </label>
-
     <label style="flex:1">To Date
       <select name="ToDate" id="ToDate" required disabled>
         <option value="">Select From Date first</option>
@@ -114,8 +124,22 @@
 
   <div id="priceInfo" class="price"></div>
 
-  <label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
-  <label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
+  <div class="form-row">
+    <label style="flex:1">Payment Date
+      <input type="date" name="PaymentDate" id="PaymentDate" readonly required>
+    </label>
+    <div style="flex:1;display:flex;align-items:center;" class="muted">
+      If payment was made earlier, please mention the actual date in the Message box.
+    </div>
+  </div>
+
+  <label>Payment Reference Number 
+    <input type="text" name="PaymentRefNo" required>
+  </label>
+
+  <label>Payment Amount (₹) 
+    <input type="number" name="PaymentAmount" required>
+  </label>
 
   <div class="form-row" style="align-items:flex-end;">
     <label style="flex:1">Members
@@ -125,20 +149,33 @@
         <option>7</option><option>8</option><option>9</option><option>10</option>
       </select>
     </label>
-    <div style="flex:1;padding:6px 8px;" class="muted">Maximum <b>8 Adults + 2 Children</b>.</div>
+    <div style="flex:1;padding:6px 8px;" class="muted">
+      Maximum <b>8 Adults + 2 Children</b>.
+    </div>
   </div>
 
-  <label>WhatsApp Number <input type="text" name="Whatsapp"></label>
-  <label>Email <input type="email" name="Email"></label>
-  <label>Message <textarea name="Message" rows="3"></textarea></label>
+  <label>WhatsApp Number <span class="muted">(optional)</span>
+    <input type="text" name="Whatsapp">
+  </label>
+
+  <label>Email <span class="muted">(optional)</span>
+    <input type="email" name="Email">
+  </label>
+
+  <label>Message
+    <textarea name="Message" rows="3"></textarea>
+  </label>
 
   <div style="margin:15px 0;padding:10px;border:1px solid #ccc;background:#f9f9f9;border-radius:6px;">
     <p><strong>Rules & Regulations:</strong></p>
-    <ul style="margin:0 0 6px 20px;">
-      <li>No non-vegetarian food allowed.</li>
+    <ul style="margin:0 0 6px 20px;padding:0;list-style-type:disc;">
+      <li>No non-vegetarian cooking or food allowed.</li>
       <li>Smoking and alcohol are strictly prohibited.</li>
     </ul>
-    <label><input type="checkbox" id="rulesAgree" required> I agree to the Rules & Regulations.</label>
+    <label>
+      <input type="checkbox" id="rulesAgree" required>
+      I have read and agree to the Rules & Regulations.
+    </label>
   </div>
 
   <button id="submitBtn" type="submit" class="btn">Submit Booking</button>
@@ -156,87 +193,96 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
 const DAYS_WINDOW = 60;
 
-/* ========== Helpers ========== */
+// Helper functions
 const pad2 = n => (n < 10 ? '0' + n : '' + n);
-const toISODate = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-const addDays = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-const parseISO = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function addDays(dt,n){ const x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()); x.setDate(x.getDate()+n); return x; }
+function parseISO(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function disableForm(formEl){ [...formEl.elements].forEach(el => el.disabled = true); }
 
-/* ========== Load availability ========== */
-(async function(){
+// Load available dates
+(async function init(){
+  document.getElementById('PaymentDate').value = toISODate(new Date());
   const fromEl = document.getElementById('FromDate');
   const toEl = document.getElementById('ToDate');
-  const priceInfo = document.getElementById('priceInfo');
 
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`, {cache:'no-store'});
-    const bookings = await res.json();
-    const blocked = new Set();
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`, { cache:'no-store' });
+    const json = await res.json();
+    const bookings = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+    bookings.sort((a,b)=> (a.FromDate||'').localeCompare(b.FromDate||''));
 
+    const blocked = new Set();
     bookings.forEach(b=>{
       const f=parseISO(b.FromDate), t=parseISO(b.ToDate);
-      for (let d=new Date(f); d<t; d.setDate(d.getDate()+1))
-        blocked.add(toISODate(d));
+      if(isNaN(f)||isNaN(t)) return;
+      for(let d=new Date(f); d<t; d.setDate(d.getDate()+1)) blocked.add(toISODate(d));
     });
 
     const today = new Date();
     const end = addDays(today, DAYS_WINDOW);
-    const available = [];
-    for (let d=new Date(today); d<=end; d.setDate(d.getDate()+1)) {
+    const options = [];
+    for(let d=new Date(today); d<=end; d.setDate(d.getDate()+1)){
       const iso = toISODate(d);
-      if (!blocked.has(iso)) available.push(iso);
+      if(!blocked.has(iso)) options.push(iso);
     }
 
-    if (available.length === 0) {
-      fromEl.innerHTML = `<option>No dates available</option>`;
-      return;
+    if(options.length){
+      fromEl.innerHTML = '<option value="">Select check-in date</option>' +
+        options.map(d=>`<option value="${d}">${d}</option>`).join('');
+      fromEl.disabled = false;
+    } else {
+      fromEl.innerHTML = '<option value="">No dates available</option>';
     }
-
-    fromEl.innerHTML = `<option value="">Select a check-in date</option>` +
-      available.map(d=>`<option value="${d}">${d}</option>`).join('');
-    fromEl.disabled = false;
 
     fromEl.addEventListener('change', ()=>{
-      const from = fromEl.value;
-      if (!from) return;
-      const idx = available.indexOf(from);
-      const toOptions = available.slice(idx+1);
-      toEl.innerHTML = `<option value="">Select checkout date</option>` +
-        toOptions.map(d=>`<option value="${d}">${d}</option>`).join('');
+      const start = fromEl.value;
+      if(!start) return;
+      const validTo = [];
+      for(let d=addDays(parseISO(start),1); d<=end; d.setDate(d.getDate()+1)){
+        const iso=toISODate(d);
+        if(blocked.has(iso)) break;
+        validTo.push(iso);
+      }
+      toEl.innerHTML = '<option value="">Select check-out date</option>' +
+        validTo.map(d=>`<option value="${d}">${d}</option>`).join('');
       toEl.disabled = false;
-      priceInfo.innerHTML = "";
     });
-  } catch(e){
-    console.error('❌ Error loading dates', e);
-  }
+  } catch(e){ console.error('⚠️ Failed to load dates', e); }
 })();
 
-/* ========== Form submission with inline confirmation ========== */
-document.getElementById('bookingForm').addEventListener('submit', async function(e){
+// Submit form inline (no popup)
+document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const form = e.target;
   const btn = document.getElementById('submitBtn');
-  const msg = document.getElementById('confirmationArea');
+  const confirmationArea = document.getElementById('confirmationArea');
   btn.disabled = true; btn.textContent = "Submitting…";
 
   try {
-    const fd = new FormData(form);
-    const res = await fetch(form.action, {method:"POST", body:fd});
-    const data = await res.json();
+    const data = new FormData(form);
+    const res = await fetch(form.action, { method:'POST', body:data });
+    const result = await res.json();
 
-    if (data.success) {
-      msg.className = "notice-success";
-      msg.innerHTML = `<b>✅ Booking Confirmed!</b><br>Your Booking ID: <b>${data.bookingId}</b><br>We will contact you soon.`;
-      if (typeof fbq === 'function') fbq('track', 'Lead');
+    if(result.success){
+      disableForm(form);
+      confirmationArea.className = 'notice-success';
+      confirmationArea.innerHTML = `
+        <div>✅ <b>Booking Confirmed!</b></div>
+        <div>Your Booking ID: <b>${result.bookingId || 'N/A'}</b></div>
+        <div>We will contact you via Phone / WhatsApp / Email.</div>`;
+      if(typeof fbq==='function'){ fbq('track','Lead'); console.log('📈 Lead event fired'); }
     } else {
-      msg.className = "notice-error";
-      msg.textContent = "Booking failed. Please try again.";
+      confirmationArea.className = 'notice-error';
+      confirmationArea.textContent = '❌ Booking failed. Please try again.';
+      btn.disabled = false; btn.textContent = "Submit Booking";
     }
   } catch(err){
-    msg.className = "notice-error";
-    msg.textContent = "Error submitting booking. Please try again later.";
+    console.error(err);
+    confirmationArea.className = 'notice-error';
+    confirmationArea.textContent = '❌ Network or server error.';
+    btn.disabled = false; btn.textContent = "Submit Booking";
   }
-  btn.disabled = false; btn.textContent = "Submit Booking";
 });
 </script>
 </body>
