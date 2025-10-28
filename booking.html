@@ -273,26 +273,67 @@ function showPrice(fromISO, toISO) {
 })();
 
 // inline submit
-document.getElementById('bookingForm').addEventListener('submit', async e=>{
+// ✅ Submit booking inline — success message on same page
+document.getElementById('bookingForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const form=e.target, btn=document.getElementById('submitBtn'), area=document.getElementById('confirmationArea');
-  btn.disabled=true; btn.textContent='Submitting…';
-  try{
-    const res=await fetch(form.action,{method:'POST',body:new FormData(form)});
-    const json=await res.json();
-    if(json.success){
+
+  const form = e.target;
+  const btn = document.getElementById('submitBtn');
+  const area = document.getElementById('confirmationArea');
+
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  try {
+    // Submit to your Google Apps Script backend
+    const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+
+    // If script returned JSON
+    let json = null;
+    try { json = await res.json(); } catch (_) {}
+
+    // ✅ Success Case 1: JSON response from Apps Script
+    if (json && json.success) {
       disableForm(form);
-      area.className='notice-success';
-      area.innerHTML=`✅ Booking Confirmed! ID: <b>${json.bookingId||'N/A'}</b><br>We’ll contact you soon.`;
-      if(typeof fbq==='function'){ fbq('track','Lead'); console.log('📈 Lead event fired'); }
-    } else throw new Error('Server returned failure');
-  }catch(err){
-    console.error(err);
-    area.className='notice-error';
-    area.textContent='❌ Network or server error. Please try again.';
-    btn.disabled=false; btn.textContent='Submit Booking';
+      area.className = 'notice-success';
+      area.innerHTML = `
+        <div>✅ <b>Booking Confirmed!</b></div>
+        <div>Your Booking ID: <b>${json.bookingId || 'N/A'}</b></div>
+        <div>We’ll contact you via Phone / WhatsApp / Email.</div>
+      `;
+      if (typeof fbq === 'function') fbq('track', 'Lead');
+      return;
+    }
+
+    // ✅ Success Case 2: Apps Script returns HTML (most common)
+    if (res.ok) {
+      disableForm(form);
+      area.className = 'notice-success';
+      area.innerHTML = `
+        <div>✅ <b>Booking Submitted Successfully!</b></div>
+        <div>Thank you for booking Selvi Home Stay.</div>
+        <div>We will contact you shortly to confirm your stay.</div>
+      `;
+      if (typeof fbq === 'function') fbq('track', 'Lead');
+      return;
+    }
+
+    // ❌ Any other case: failure
+    throw new Error('Server returned non-OK');
+  } catch (err) {
+    console.error('Booking submission failed:', err);
+    area.className = 'notice-error';
+    area.textContent = '❌ Network or server error. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Submit Booking';
   }
 });
+
+// ✅ Helper to disable form fields after submission
+function disableForm(formEl) {
+  [...formEl.elements].forEach(el => el.disabled = true);
+}
 </script>
+
 </body>
 </html>
