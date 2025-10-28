@@ -23,6 +23,7 @@
     background: #fef2f2; border: 1px solid #fecaca; color:#7f1d1d;
   }
   .btn[disabled] { opacity: .6; cursor: not-allowed; }
+  .pay-link { margin-top: 10px; display:inline-block; font-weight:bold; color:#065f46; }
 </style>
 
 <!-- ✅ Meta Pixel Code -->
@@ -115,6 +116,7 @@
         <option value="">Loading available dates…</option>
       </select>
     </label>
+
     <label style="flex:1">To Date
       <select name="ToDate" id="ToDate" required disabled>
         <option value="">Select From Date first</option>
@@ -134,11 +136,11 @@
   </div>
 
   <label>Payment Reference Number 
-    <input type="text" name="PaymentRefNo" required>
+    <input type="text" name="PaymentRefNo" placeholder="e.g. 123456789012" required>
   </label>
 
   <label>Payment Amount (₹) 
-    <input type="number" name="PaymentAmount" required>
+    <input type="number" name="PaymentAmount" placeholder="e.g. Minimum ₹1000/day" required>
   </label>
 
   <div class="form-row" style="align-items:flex-end;">
@@ -169,8 +171,8 @@
   <div style="margin:15px 0;padding:10px;border:1px solid #ccc;background:#f9f9f9;border-radius:6px;">
     <p><strong>Rules & Regulations:</strong></p>
     <ul style="margin:0 0 6px 20px;padding:0;list-style-type:disc;">
-      <li>No non-vegetarian cooking or food allowed.</li>
-      <li>Smoking and alcohol are strictly prohibited.</li>
+      <li>No non-vegetarian food allowed inside.</li>
+      <li>Smoking or drinking alcohol is strictly prohibited.</li>
     </ul>
     <label>
       <input type="checkbox" id="rulesAgree" required>
@@ -192,96 +194,103 @@
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
 const DAYS_WINDOW = 60;
+let RATES = { ratePerDay: 3600, gstPercent: 12, basePerDay: 1000 }; // default in case fetch fails
 
-// Helper functions
-const pad2 = n => (n < 10 ? '0' + n : '' + n);
+// helpers
+const pad2 = n => (n<10 ? '0'+n : n);
 function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
-function addDays(dt,n){ const x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()); x.setDate(x.getDate()+n); return x; }
+function addDays(dt,n){ const x=new Date(dt); x.setDate(x.getDate()+n); return x; }
 function parseISO(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
 function disableForm(formEl){ [...formEl.elements].forEach(el => el.disabled = true); }
 
-// Load available dates
+// pricing display
+function showPrice(fromISO, toISO) {
+  const el = document.getElementById('priceInfo');
+  if (!fromISO || !toISO) return el.innerHTML = '';
+  const nights = (parseISO(toISO) - parseISO(fromISO)) / (1000*60*60*24);
+  if (nights <= 0) return el.innerHTML = '';
+
+  const base = RATES.basePerDay * nights;
+  const full = RATES.ratePerDay * nights;
+  const gst = Math.round(full * RATES.gstPercent / 100);
+  const total = full + gst;
+
+  el.innerHTML = `
+    <div><b>Stay:</b> ${nights} night(s)</div>
+    <div>Advance: ₹${RATES.basePerDay} × ${nights} = <b>₹${base}</b></div>
+    <div>Full: ₹${RATES.ratePerDay}/day</div>
+    <div>GST @${RATES.gstPercent}% = ₹${gst}</div>
+    <div><b>Total: ₹${total}</b></div>
+    <a class="pay-link" href="payment.html" target="_blank">➡ Proceed to Payment</a>
+  `;
+}
+
+// load availability
 (async function init(){
   document.getElementById('PaymentDate').value = toISODate(new Date());
   const fromEl = document.getElementById('FromDate');
   const toEl = document.getElementById('ToDate');
+  try {
+    const ratesRes = await fetch(`${APPS_SCRIPT_URL}?action=get_rates`);
+    if(ratesRes.ok) RATES = await ratesRes.json();
+  } catch(e){ console.warn('Rate load failed, using defaults'); }
 
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`, { cache:'no-store' });
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`);
     const json = await res.json();
     const bookings = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
-    bookings.sort((a,b)=> (a.FromDate||'').localeCompare(b.FromDate||''));
-
     const blocked = new Set();
     bookings.forEach(b=>{
       const f=parseISO(b.FromDate), t=parseISO(b.ToDate);
-      if(isNaN(f)||isNaN(t)) return;
       for(let d=new Date(f); d<t; d.setDate(d.getDate()+1)) blocked.add(toISODate(d));
     });
 
-    const today = new Date();
-    const end = addDays(today, DAYS_WINDOW);
-    const options = [];
+    const today = new Date(), end = addDays(today, DAYS_WINDOW);
+    const available = [];
     for(let d=new Date(today); d<=end; d.setDate(d.getDate()+1)){
       const iso = toISODate(d);
-      if(!blocked.has(iso)) options.push(iso);
+      if(!blocked.has(iso)) available.push(iso);
     }
 
-    if(options.length){
-      fromEl.innerHTML = '<option value="">Select check-in date</option>' +
-        options.map(d=>`<option value="${d}">${d}</option>`).join('');
-      fromEl.disabled = false;
-    } else {
-      fromEl.innerHTML = '<option value="">No dates available</option>';
-    }
+    fromEl.innerHTML = '<option value="">Select check-in date</option>' + available.map(d=>`<option value="${d}">${d}</option>`).join('');
+    fromEl.disabled = false;
 
     fromEl.addEventListener('change', ()=>{
       const start = fromEl.value;
       if(!start) return;
-      const validTo = [];
+      const toList=[];
       for(let d=addDays(parseISO(start),1); d<=end; d.setDate(d.getDate()+1)){
         const iso=toISODate(d);
         if(blocked.has(iso)) break;
-        validTo.push(iso);
+        toList.push(iso);
       }
-      toEl.innerHTML = '<option value="">Select check-out date</option>' +
-        validTo.map(d=>`<option value="${d}">${d}</option>`).join('');
-      toEl.disabled = false;
+      toEl.innerHTML = '<option value="">Select check-out date</option>' + toList.map(d=>`<option value="${d}">${d}</option>`).join('');
+      toEl.disabled=false;
     });
-  } catch(e){ console.error('⚠️ Failed to load dates', e); }
+
+    toEl.addEventListener('change', ()=>showPrice(fromEl.value,toEl.value));
+  } catch(e){ console.error('Failed to load dates', e); }
 })();
 
-// Submit form inline (no popup)
-document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
+// inline submit
+document.getElementById('bookingForm').addEventListener('submit', async e=>{
   e.preventDefault();
-  const form = e.target;
-  const btn = document.getElementById('submitBtn');
-  const confirmationArea = document.getElementById('confirmationArea');
-  btn.disabled = true; btn.textContent = "Submitting…";
-
-  try {
-    const data = new FormData(form);
-    const res = await fetch(form.action, { method:'POST', body:data });
-    const result = await res.json();
-
-    if(result.success){
+  const form=e.target, btn=document.getElementById('submitBtn'), area=document.getElementById('confirmationArea');
+  btn.disabled=true; btn.textContent='Submitting…';
+  try{
+    const res=await fetch(form.action,{method:'POST',body:new FormData(form)});
+    const json=await res.json();
+    if(json.success){
       disableForm(form);
-      confirmationArea.className = 'notice-success';
-      confirmationArea.innerHTML = `
-        <div>✅ <b>Booking Confirmed!</b></div>
-        <div>Your Booking ID: <b>${result.bookingId || 'N/A'}</b></div>
-        <div>We will contact you via Phone / WhatsApp / Email.</div>`;
+      area.className='notice-success';
+      area.innerHTML=`✅ Booking Confirmed! ID: <b>${json.bookingId||'N/A'}</b><br>We’ll contact you soon.`;
       if(typeof fbq==='function'){ fbq('track','Lead'); console.log('📈 Lead event fired'); }
-    } else {
-      confirmationArea.className = 'notice-error';
-      confirmationArea.textContent = '❌ Booking failed. Please try again.';
-      btn.disabled = false; btn.textContent = "Submit Booking";
-    }
-  } catch(err){
+    } else throw new Error('Server returned failure');
+  }catch(err){
     console.error(err);
-    confirmationArea.className = 'notice-error';
-    confirmationArea.textContent = '❌ Network or server error.';
-    btn.disabled = false; btn.textContent = "Submit Booking";
+    area.className='notice-error';
+    area.textContent='❌ Network or server error. Please try again.';
+    btn.disabled=false; btn.textContent='Submit Booking';
   }
 });
 </script>
