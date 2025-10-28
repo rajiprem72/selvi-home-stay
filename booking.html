@@ -90,7 +90,8 @@
 <h2>Booking Form</h2>
 
 <form id="bookingForm" method="POST"
-  action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec">
+  action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec"
+  target="SelviSHSSubmitWin">
   <input type="hidden" name="action" value="create_booking">
   <input type="hidden" name="Source" value="Website">
 
@@ -191,10 +192,13 @@
   WhatsApp +91 98844 86609
 </footer>
 
+<!-- Hidden iframe for form POST (keeps everything same-page) -->
+<iframe name="SelviSHSSubmitWin" id="SelviSHSSubmitWin" style="display:none;"></iframe>
+
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
 const DAYS_WINDOW = 60;
-let RATES = { ratePerDay: 3600, gstPercent: 12, basePerDay: 1000 }; // default in case fetch fails
+let RATES = { ratePerDay: 3600, gstPercent: 12, basePerDay: 1000 };
 
 // helpers
 const pad2 = n => (n<10 ? '0'+n : n);
@@ -272,67 +276,60 @@ function showPrice(fromISO, toISO) {
   } catch(e){ console.error('Failed to load dates', e); }
 })();
 
-// inline submit
-// ✅ Submit booking inline — success message on same page
-document.getElementById('bookingForm').addEventListener('submit', async e => {
-  e.preventDefault();
+// iframe-based submit (no CORS issue)
+(function setupIframeSubmit(){
+  const form = document.getElementById('bookingForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const confirmationArea = document.getElementById('confirmationArea');
+  form.target = 'SelviSHSSubmitWin';
 
-  const form = e.target;
-  const btn = document.getElementById('submitBtn');
-  const area = document.getElementById('confirmationArea');
-
-  btn.disabled = true;
-  btn.textContent = "Submitting…";
-
-  try {
-    // Submit to your Google Apps Script backend
-    const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
-
-    // If script returned JSON
-    let json = null;
-    try { json = await res.json(); } catch (_) {}
-
-    // ✅ Success Case 1: JSON response from Apps Script
-    if (json && json.success) {
-      disableForm(form);
-      area.className = 'notice-success';
-      area.innerHTML = `
-        <div>✅ <b>Booking Confirmed!</b></div>
-        <div>Your Booking ID: <b>${json.bookingId || 'N/A'}</b></div>
-        <div>We’ll contact you via Phone / WhatsApp / Email.</div>
-      `;
-      if (typeof fbq === 'function') fbq('track', 'Lead');
-      return;
-    }
-
-    // ✅ Success Case 2: Apps Script returns HTML (most common)
-    if (res.ok) {
-      disableForm(form);
-      area.className = 'notice-success';
-      area.innerHTML = `
-        <div>✅ <b>Booking Submitted Successfully!</b></div>
-        <div>Thank you for booking Selvi Home Stay.</div>
-        <div>We will contact you shortly to confirm your stay.</div>
-      `;
-      if (typeof fbq === 'function') fbq('track', 'Lead');
-      return;
-    }
-
-    // ❌ Any other case: failure
-    throw new Error('Server returned non-OK');
-  } catch (err) {
-    console.error('Booking submission failed:', err);
-    area.className = 'notice-error';
-    area.textContent = '❌ Network or server error. Please try again.';
-    btn.disabled = false;
-    btn.textContent = 'Submit Booking';
+  function ensureReturnInput() {
+    let existing = form.querySelector('input[name="return"]');
+    if (!existing) {
+      const r = document.createElement('input');
+      r.type = 'hidden';
+      r.name = 'return';
+      r.value = 'postMessage';
+      form.appendChild(r);
+    } else existing.value = 'postMessage';
   }
-});
 
-// ✅ Helper to disable form fields after submission
-function disableForm(formEl) {
-  [...formEl.elements].forEach(el => el.disabled = true);
-}
+  window.addEventListener('message', (event) => {
+    const data = event.data || {};
+    if (!data || typeof data !== 'object') return;
+    if (!('success' in data)) return;
+
+    if (data.success) {
+      disableForm(form);
+      confirmationArea.className = 'notice-success';
+      confirmationArea.innerHTML =
+        `<div>✅ <b>Booking Confirmed!</b></div>
+         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
+         <div>We will contact you via Phone / WhatsApp / Email.</div>`;
+      if (typeof fbq === 'function') fbq('track','Lead');
+    } else {
+      confirmationArea.className = 'notice-error';
+      confirmationArea.textContent = `Error: ${data.error || 'Unknown error'}`;
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Booking";
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    ensureReturnInput();
+    const fd = new FormData(form);
+    const from = fd.get('FromDate') || '';
+    const to = fd.get('ToDate') || '';
+    if (!from || !to || to <= from) {
+      alert('Please choose a valid From Date and To Date.');
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting…";
+    form.submit();
+  }, false);
+})();
 </script>
 
 </body>
