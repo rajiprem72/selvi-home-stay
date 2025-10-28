@@ -288,11 +288,13 @@ function showPrice(fromISO, toISO) {
 })();
 
 // ✅ Popup submission flow
+<!-- ✅ Popup submission flow -->
+<script>
 (function setupBookingFlow() {
   const form = document.getElementById('bookingForm');
   const submitBtn = document.getElementById('submitBtn');
   const confirmationArea = document.getElementById('confirmationArea');
-  let popupRef = null;
+  window._selviPopupRef = null; // keep global ref for closing later
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -302,10 +304,11 @@ function showPrice(fromISO, toISO) {
       return;
     }
 
+    // ✅ Open small popup
     const w = 420, h = 400;
     const left = window.screenX + (window.outerWidth - w) / 2;
     const top = window.screenY + (window.outerHeight - h) / 2;
-    popupRef = window.open('', 'SelviPopup',
+    const popupRef = window.open('', 'SelviPopup',
       `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
 
     if (!popupRef) {
@@ -313,18 +316,21 @@ function showPrice(fromISO, toISO) {
       return;
     }
 
+    // keep reference for postMessage close
+    window._selviPopupRef = popupRef;
+
     form.target = 'SelviPopup';
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting…";
+
+    // ✅ Submit form to Apps Script
     form.submit();
   });
-
-   // ✅ Close popup automatically
-  try { popupRef && popupRef.close && popupRef.close(); } catch (_) {}
-  });
 })();
+</script>
 
-/* ✅ Replace the old handler with this safe version */
+  
+  /* ✅ Replace the old handler with this safe version */
 (function secureMessageListener() {
   const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
 
