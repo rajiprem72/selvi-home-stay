@@ -90,8 +90,7 @@
 <h2>Booking Form</h2>
 
 <form id="bookingForm" method="POST"
-  action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec"
-  target="SelviSHSSubmitWin">
+  action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec">
   <input type="hidden" name="action" value="create_booking">
   <input type="hidden" name="Source" value="Website">
 
@@ -192,22 +191,35 @@
   WhatsApp +91 98844 86609
 </footer>
 
-<!-- Hidden iframe for form POST (keeps everything same-page) -->
-<iframe name="SelviSHSSubmitWin" id="SelviSHSSubmitWin" style="display:none;"></iframe>
-
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
 const DAYS_WINDOW = 60;
 let RATES = { ratePerDay: 3600, gstPercent: 12, basePerDay: 1000 };
 
-// helpers
+// small helper utilities
 const pad2 = n => (n<10 ? '0'+n : n);
 function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
 function addDays(dt,n){ const x=new Date(dt); x.setDate(x.getDate()+n); return x; }
 function parseISO(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
 function disableForm(formEl){ [...formEl.elements].forEach(el => el.disabled = true); }
 
-// pricing display
+// JSONP fetch to bypass CORS
+function jsonpFetch(url) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb' + Date.now() + Math.floor(Math.random()*1000);
+    window[cb] = function(data) {
+      resolve(data);
+      try { delete window[cb]; } catch(_) {}
+      script.remove();
+    };
+    const script = document.createElement('script');
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+    script.onerror = () => reject(new Error('JSONP load error'));
+    document.head.appendChild(script);
+  });
+}
+
+// display pricing details
 function showPrice(fromISO, toISO) {
   const el = document.getElementById('priceInfo');
   if (!fromISO || !toISO) return el.innerHTML = '';
@@ -229,19 +241,18 @@ function showPrice(fromISO, toISO) {
   `;
 }
 
-// load availability
+// load available dates
 (async function init(){
   document.getElementById('PaymentDate').value = toISODate(new Date());
   const fromEl = document.getElementById('FromDate');
   const toEl = document.getElementById('ToDate');
   try {
-    const ratesRes = await fetch(`${APPS_SCRIPT_URL}?action=get_rates`);
-    if(ratesRes.ok) RATES = await ratesRes.json();
-  } catch(e){ console.warn('Rate load failed, using defaults'); }
+    const ratesData = await jsonpFetch(`${APPS_SCRIPT_URL}?action=get_rates`);
+    if (ratesData) RATES = ratesData;
+  } catch(e){ console.warn('Rate load failed', e); }
 
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`);
-    const json = await res.json();
+    const json = await jsonpFetch(`${APPS_SCRIPT_URL}?action=get_bookings`);
     const bookings = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
     const blocked = new Set();
     bookings.forEach(b=>{
@@ -276,59 +287,60 @@ function showPrice(fromISO, toISO) {
   } catch(e){ console.error('Failed to load dates', e); }
 })();
 
-// iframe-based submit (no CORS issue)
-(function setupIframeSubmit(){
+// ✅ Popup submission flow
+(function setupBookingFlow() {
   const form = document.getElementById('bookingForm');
   const submitBtn = document.getElementById('submitBtn');
   const confirmationArea = document.getElementById('confirmationArea');
-  form.target = 'SelviSHSSubmitWin';
+  let popupRef = null;
 
-  function ensureReturnInput() {
-    let existing = form.querySelector('input[name="return"]');
-    if (!existing) {
-      const r = document.createElement('input');
-      r.type = 'hidden';
-      r.name = 'return';
-      r.value = 'postMessage';
-      form.appendChild(r);
-    } else existing.value = 'postMessage';
-  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (!document.getElementById('rulesAgree').checked) {
+      alert("Please agree to the Rules & Regulations before submitting.");
+      return;
+    }
+
+    const w = 420, h = 400;
+    const left = window.screenX + (window.outerWidth - w) / 2;
+    const top = window.screenY + (window.outerHeight - h) / 2;
+    popupRef = window.open('', 'SelviPopup',
+      `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
+
+    if (!popupRef) {
+      alert("Please allow pop-ups for this website to continue your booking.");
+      return;
+    }
+
+    form.target = 'SelviPopup';
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting…";
+    form.submit();
+  });
 
   window.addEventListener('message', (event) => {
     const data = event.data || {};
     if (!data || typeof data !== 'object') return;
-    if (!('success' in data)) return;
 
     if (data.success) {
-      disableForm(form);
       confirmationArea.className = 'notice-success';
-      confirmationArea.innerHTML =
-        `<div>✅ <b>Booking Confirmed!</b></div>
-         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
-         <div>We will contact you via Phone / WhatsApp / Email.</div>`;
-      if (typeof fbq === 'function') fbq('track','Lead');
+      confirmationArea.innerHTML = `
+        <div>✅ <b>Booking Confirmed!</b></div>
+        <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
+        <div>We’ll contact you via Phone / WhatsApp / Email.</div>
+      `;
+      disableForm(form);
+      if (typeof fbq === 'function') fbq('track', 'Lead');
     } else {
       confirmationArea.className = 'notice-error';
-      confirmationArea.textContent = `Error: ${data.error || 'Unknown error'}`;
+      confirmationArea.textContent = data.error || '❌ Booking failed. Please try again.';
       submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Booking";
+      submitBtn.textContent = 'Submit Booking';
     }
-  });
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    ensureReturnInput();
-    const fd = new FormData(form);
-    const from = fd.get('FromDate') || '';
-    const to = fd.get('ToDate') || '';
-    if (!from || !to || to <= from) {
-      alert('Please choose a valid From Date and To Date.');
-      return;
-    }
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting…";
-    form.submit();
-  }, false);
+    try { popupRef && popupRef.close && popupRef.close(); } catch (_) {}
+  });
 })();
 </script>
 
