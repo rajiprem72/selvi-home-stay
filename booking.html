@@ -319,9 +319,28 @@ function showPrice(fromISO, toISO) {
     form.submit();
   });
 
+   // ✅ Close popup automatically
+  try { popupRef && popupRef.close && popupRef.close(); } catch (_) {}
+  });
+})();
+
+/* ✅ Replace the old handler with this safe version */
+(function secureMessageListener() {
+  const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
+
   window.addEventListener('message', (event) => {
-    const data = event.data || {};
+    try {
+      const origin = (event.origin || '').toLowerCase();
+      if (!TRUSTED_ORIGINS.has(origin)) return;
+    } catch (err) { return; }
+
+    const data = event.data;
     if (!data || typeof data !== 'object') return;
+    if (!('success' in data) || typeof data.success !== 'boolean') return;
+
+    const form = document.getElementById('bookingForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const confirmationArea = document.getElementById('confirmationArea');
 
     if (data.success) {
       confirmationArea.className = 'notice-success';
@@ -330,8 +349,8 @@ function showPrice(fromISO, toISO) {
         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
         <div>We’ll contact you via Phone / WhatsApp / Email.</div>
       `;
-      disableForm(form);
-      if (typeof fbq === 'function') fbq('track', 'Lead');
+      [...form.elements].forEach(el => el.disabled = true);
+      if (typeof fbq === 'function') fbq('track','Lead');
     } else {
       confirmationArea.className = 'notice-error';
       confirmationArea.textContent = data.error || '❌ Booking failed. Please try again.';
@@ -339,10 +358,9 @@ function showPrice(fromISO, toISO) {
       submitBtn.textContent = 'Submit Booking';
     }
 
-    try { popupRef && popupRef.close && popupRef.close(); } catch (_) {}
-  });
+    try { if (window._selviPopupRef) { window._selviPopupRef.close(); window._selviPopupRef = null; } } catch(_) {}
+  }, false);
 })();
 </script>
-
 </body>
 </html>
