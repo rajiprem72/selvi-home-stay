@@ -302,7 +302,8 @@ function computeToOptions(fromISO, blockedSorted){
 })();
 
 /* SUBMIT: popup flow (Apps Script returns HTML that posts postMessage to opener/top) */
-(function setupSubmitPopup(){
+<script>
+(function setupSubmitPopup() {
   const form = document.getElementById('bookingForm');
   const btn = document.getElementById('submitBtn');
   const confirmationArea = document.getElementById('confirmationArea');
@@ -316,15 +317,17 @@ function computeToOptions(fromISO, blockedSorted){
       return;
     }
 
-    // Basic validation for dates
-    const f = form.FromDate && form.FromDate.value;
-    const t = form.ToDate && form.ToDate.value;
+    const f = form.FromDate?.value, t = form.ToDate?.value;
     if (!f || !t || t <= f) {
       alert('Please choose valid From and To dates.');
       return;
     }
 
-    // open small centered popup
+    // ✅ Disable the button immediately to prevent repeat clicks
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    // ✅ Open small centered popup
     const w = 420, h = 460;
     const left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
     const top = window.screenY + Math.max(0, (window.outerHeight - h) / 2);
@@ -333,38 +336,34 @@ function computeToOptions(fromISO, blockedSorted){
 
     if (!popup) {
       alert('Please allow pop-ups for this website to continue your booking.');
+      btn.disabled = false;
+      btn.textContent = 'Submit Booking';
       return;
     }
 
     window._selviPopupRef = popup;
     form.target = 'SelviPopup';
-
-    btn.disabled = true;
-    btn.textContent = 'Submitting…';
-
-    // submit form into the popup; Apps Script must return HTML that calls window.top.postMessage(...)
     form.submit();
 
-    // fallback timeout: if nothing back in 12s show message and re-enable
-    const fallback = setTimeout(() => {
-      if (btn.disabled) {
-        confirmationArea.className = 'notice-error';
-        confirmationArea.textContent = '❌ Network or server error. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Submit Booking';
-        try { if (window._selviPopupRef) window._selviPopupRef.close(); } catch(_) {}
+    // ✅ Detect if popup is manually closed by user
+    const popupMonitor = setInterval(() => {
+      if (!window._selviPopupRef || window._selviPopupRef.closed) {
+        clearInterval(popupMonitor);
+        // ✅ Redirect gracefully to index.html (no network error)
+        window.location.href = 'index.html';
       }
-    }, 12000);
+    }, 1000);
 
-    // Listen for a successful message once (handler below clears popup and fallback)
-    const onceListener = (event) => {
-      // handled by secure message listener below, but we still clear fallback and cleanup here
-      clearTimeout(fallback);
-      window.removeEventListener('message', onceListener);
-    };
-    window.addEventListener('message', onceListener, false);
+    // ✅ Auto-timeout fallback (e.g. slow network)
+    setTimeout(() => {
+      if (!window._selviPopupRef || window._selviPopupRef.closed) return;
+      try { window._selviPopupRef.close(); } catch (_) {}
+      window._selviPopupRef = null;
+      window.location.href = 'index.html';
+    }, 15000); // after 15s, close popup and redirect
   });
 })();
+</script>
 
 /* SECURE message listener - only accept from Apps Script origins */
 (function secureMessageListener() {
