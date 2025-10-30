@@ -151,7 +151,6 @@
   Designed by <br> Premanandhan Narayanan Padi <br>
   WhatsApp +91 98844 86609
 </footer>
-
 <script>
 /* CONFIG */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
@@ -235,44 +234,34 @@ function computeToOptions(fromISO, blockedSorted){
 
 /* INIT: load rates and bookings, populate selects */
 (async function init(){
-  // set payment date to today (readonly)
   document.getElementById('PaymentDate').value = toISODate(new Date());
-
   const fromEl = document.getElementById('FromDate');
   const toEl = document.getElementById('ToDate');
 
-  // load rates (no-cache)
   try {
     const r = await fetch(`${APPS_SCRIPT_URL}?action=get_rates`, { cache:'no-store' });
     if (r.ok) {
       const data = await r.json();
       if (data && typeof data.ratePerDay !== 'undefined') RATES = data;
     }
-  } catch (err) {
-    console.warn('Could not load rates, using defaults', err);
-  }
+  } catch (err) { console.warn('Could not load rates', err); }
 
-  // load bookings
   try {
     const r = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`, { cache:'no-store' });
     if (!r.ok) throw new Error('Failed fetching bookings');
     const json = await r.json();
     const bookings = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
-    // blocked set
     const blocked = buildBlockedSet(bookings);
     const blockedSorted = Array.from(blocked).sort();
-
     const availableFrom = computeAvailableFromDates(blocked);
     if (availableFrom.length === 0) {
       fromEl.innerHTML = '<option value="">No dates available</option>';
       fromEl.disabled = true;
       return;
     }
-
     fromEl.innerHTML = '<option value="">Select check-in date</option>' +
                        availableFrom.map(d => `<option value="${d}">${d}</option>`).join('');
     fromEl.disabled = false;
-
     fromEl.addEventListener('change', () => {
       const start = fromEl.value;
       document.getElementById('priceInfo').innerHTML = '';
@@ -290,10 +279,8 @@ function computeToOptions(fromISO, blockedSorted){
       toEl.innerHTML = '<option value="">Select checkout date</option>' +
                        toOptions.map(d => `<option value="${d}">${d}</option>`).join('');
       toEl.disabled = false;
-      // ensure the listener is fresh
       toEl.onchange = () => showPrice(start, toEl.value);
     });
-
   } catch (err) {
     console.error('Failed to load bookings', err);
     fromEl.innerHTML = '<option value="">Unable to load dates</option>';
@@ -301,8 +288,7 @@ function computeToOptions(fromISO, blockedSorted){
   }
 })();
 
-/* SUBMIT: popup flow (Apps Script returns HTML that posts postMessage to opener/top) */
-<script>
+/* ✅ SUBMIT + POPUP HANDLER */
 (function setupSubmitPopup() {
   const form = document.getElementById('bookingForm');
   const btn = document.getElementById('submitBtn');
@@ -311,83 +297,66 @@ function computeToOptions(fromISO, blockedSorted){
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-
     if (!document.getElementById('rulesAgree').checked) {
       alert('Please agree to the Rules & Regulations before submitting.');
       return;
     }
-
     const f = form.FromDate?.value, t = form.ToDate?.value;
     if (!f || !t || t <= f) {
       alert('Please choose valid From and To dates.');
       return;
     }
-
-    // ✅ Disable the button immediately to prevent repeat clicks
     btn.disabled = true;
     btn.textContent = 'Submitting…';
-
-    // ✅ Open small centered popup
     const w = 420, h = 460;
     const left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
     const top = window.screenY + Math.max(0, (window.outerHeight - h) / 2);
-    const popup = window.open('', 'SelviPopup',
-      `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
-
+    const popup = window.open('', 'SelviPopup', `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
     if (!popup) {
       alert('Please allow pop-ups for this website to continue your booking.');
       btn.disabled = false;
       btn.textContent = 'Submit Booking';
       return;
     }
-
     window._selviPopupRef = popup;
     form.target = 'SelviPopup';
     form.submit();
 
-    // ✅ Detect if popup is manually closed by user
+    // ✅ Detect if popup manually closed
     const popupMonitor = setInterval(() => {
       if (!window._selviPopupRef || window._selviPopupRef.closed) {
         clearInterval(popupMonitor);
-        // ✅ Redirect gracefully to index.html (no network error)
         window.location.href = 'index.html';
       }
     }, 1000);
 
-    // ✅ Auto-timeout fallback (e.g. slow network)
+    // ✅ Auto-timeout fallback
     setTimeout(() => {
       if (!window._selviPopupRef || window._selviPopupRef.closed) return;
       try { window._selviPopupRef.close(); } catch (_) {}
       window._selviPopupRef = null;
       window.location.href = 'index.html';
-    }, 15000); // after 15s, close popup and redirect
+    }, 15000);
   });
 })();
-</script>
 
-/* SECURE message listener - only accept from Apps Script origins */
+/* ✅ SECURE MESSAGE LISTENER */
 (function secureMessageListener() {
   const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
-  let bookingHandled = false; // ✅ to prevent duplicate or fake triggers
-
+  let bookingHandled = false;
   window.addEventListener('message', (event) => {
     try {
       const origin = (event.origin || '').toLowerCase();
       if (!TRUSTED_ORIGINS.has(origin)) return;
     } catch (err) { return; }
-
     const data = event.data;
-    // ✅ Ignore if message already handled or invalid
     if (bookingHandled) return;
     if (!data || typeof data !== 'object') return;
     if (!('success' in data) || typeof data.success !== 'boolean') return;
-
-    bookingHandled = true; // ✅ Only handle once
-
+    bookingHandled = true;
     const form = document.getElementById('bookingForm');
     const submitBtn = document.getElementById('submitBtn');
     const confirmationArea = document.getElementById('confirmationArea');
-
     if (data.success) {
       confirmationArea.className = 'notice-success';
       confirmationArea.innerHTML = `
@@ -395,7 +364,6 @@ function computeToOptions(fromISO, blockedSorted){
         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
         <div>We’ll contact you via Phone / WhatsApp / Email.</div>
       `;
-      // ✅ Disable all inputs and submit button
       [...form.elements].forEach(el => el.disabled = true);
       submitBtn.disabled = true;
       if (typeof fbq === 'function') fbq('track','Lead');
@@ -405,17 +373,16 @@ function computeToOptions(fromISO, blockedSorted){
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Booking';
     }
-
-    // ✅ Close popup safely
     try {
       if (window._selviPopupRef && !window._selviPopupRef.closed) {
         window._selviPopupRef.close();
       }
       window._selviPopupRef = null;
-    } catch(_) {}
+    } catch (_) {}
   }, false);
 })();
 </script>
+
 
 </body>
 </html>
