@@ -367,23 +367,26 @@ function computeToOptions(fromISO, blockedSorted){
 })();
 
 /* SECURE message listener - only accept from Apps Script origins */
-(function secureMessageListener(){
-  const TRUSTED = new Set([
-    'https://script.google.com',
-    'https://script.googleusercontent.com'
-  ]);
+(function secureMessageListener() {
+  const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
+  let bookingHandled = false; // ✅ to prevent duplicate or fake triggers
 
   window.addEventListener('message', (event) => {
     try {
       const origin = (event.origin || '').toLowerCase();
-      if (!TRUSTED.has(origin)) return;
+      if (!TRUSTED_ORIGINS.has(origin)) return;
     } catch (err) { return; }
 
     const data = event.data;
-    if (!data || typeof data !== 'object' || typeof data.success !== 'boolean') return;
+    // ✅ Ignore if message already handled or invalid
+    if (bookingHandled) return;
+    if (!data || typeof data !== 'object') return;
+    if (!('success' in data) || typeof data.success !== 'boolean') return;
+
+    bookingHandled = true; // ✅ Only handle once
 
     const form = document.getElementById('bookingForm');
-    const btn = document.getElementById('submitBtn');
+    const submitBtn = document.getElementById('submitBtn');
     const confirmationArea = document.getElementById('confirmationArea');
 
     if (data.success) {
@@ -391,20 +394,26 @@ function computeToOptions(fromISO, blockedSorted){
       confirmationArea.innerHTML = `
         <div>✅ <b>Booking Confirmed!</b></div>
         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
-        <div>We will contact you via Phone / WhatsApp / Email.</div>
+        <div>We’ll contact you via Phone / WhatsApp / Email.</div>
       `;
-      // disable form to prevent re-submit
+      // ✅ Disable all inputs and submit button
       [...form.elements].forEach(el => el.disabled = true);
-      btn.textContent = 'Submitted';
+      submitBtn.disabled = true;
+      if (typeof fbq === 'function') fbq('track','Lead');
     } else {
       confirmationArea.className = 'notice-error';
       confirmationArea.textContent = data.error || '❌ Booking failed. Please try again.';
-      btn.disabled = false;
-      btn.textContent = 'Submit Booking';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Booking';
     }
 
-    // close popup if open
-    try { if (window._selviPopupRef) { window._selviPopupRef.close(); window._selviPopupRef = null; } } catch(_) {}
+    // ✅ Close popup safely
+    try {
+      if (window._selviPopupRef && !window._selviPopupRef.closed) {
+        window._selviPopupRef.close();
+      }
+      window._selviPopupRef = null;
+    } catch(_) {}
   }, false);
 })();
 </script>
