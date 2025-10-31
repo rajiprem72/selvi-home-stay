@@ -364,8 +364,7 @@ function computeToOptions(fromISO, blockedSorted){
         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
         <div>We’ll contact you via Phone / WhatsApp / Email.</div>
         <div>This window will close automatically in 15 seconds. Kindly wait.....</div>
-        
-      `;
+       `;
       [...form.elements].forEach(el => el.disabled = true);
       submitBtn.disabled = true;
       if (typeof fbq === 'function') fbq('track','Lead');
