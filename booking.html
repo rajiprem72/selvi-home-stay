@@ -148,7 +148,7 @@
 
 <footer>
   © 2025 Selvi Home Stay <br>
-  Designed by <br> Premanandhan Narayanan Periyar street <br>
+  Designed by <br> Premanandhan Narayanan Greater Chennai <br>
   WhatsApp +91 98844 86609
 </footer>
 <script>
@@ -363,6 +363,8 @@ function computeToOptions(fromISO, blockedSorted){
         <div>✅ <b>Booking Confirmed!</b></div>
         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
         <div>We’ll contact you via Phone / WhatsApp / Email.</div>
+        <div>This window will close automatically in 15 seconds. Kindly wait.....</div>
+        
       `;
       [...form.elements].forEach(el => el.disabled = true);
       submitBtn.disabled = true;
