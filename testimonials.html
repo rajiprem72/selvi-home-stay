@@ -49,18 +49,22 @@
   <h2>What People Say About Us</h2>
   <p class="review-note">Screenshots from Google Reviews</p>
 
-  <div class="carousel">
-    <button class="nav prev">&#10094;</button>
-
+  <div class="carousel-wrapper">
     <div class="carousel-track">
+      <!-- Original slides -->
       <img src="reviews/review1.png" alt="Google Review 1">
       <img src="reviews/review2.png" alt="Google Review 2">
       <img src="reviews/review3.png" alt="Google Review 3">
       <img src="reviews/review4.png" alt="Google Review 4">
       <img src="reviews/review5.png" alt="Google Review 5">
-    </div>
 
-    <button class="nav next">&#10095;</button>
+      <!-- Duplicate slides for infinite loop -->
+      <img src="reviews/review1.png" alt="">
+      <img src="reviews/review2.png" alt="">
+      <img src="reviews/review3.png" alt="">
+      <img src="reviews/review4.png" alt="">
+      <img src="reviews/review5.png" alt="">
+    </div>
   </div>
 
   <a class="google-link" href="https://www.google.com/maps" target="_blank">
