@@ -176,3 +176,59 @@ input, textarea {
   border: 0;
   border-radius: 10px;
 }
+
+
+
+.google-review-section {
+  max-width: 1000px;
+  margin: 60px auto;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.review-note {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.carousel-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  width: max-content;
+  animation: scroll-left 30s linear infinite;
+}
+
+.carousel-track img {
+  width: 320px;
+  margin: 0 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Auto scroll animation */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause on hover */
+.carousel-wrapper:hover .carousel-track {
+  animation-play-state: paused;
+}
+
+.google-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: bold;
+}
