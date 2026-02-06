@@ -58,10 +58,12 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-<header>
-  <h1>Selvi Home Stay</h1>
-  <div class="menu-toggle"><span></span><span></span><span></span></div>
-  <nav>
+<header class="header">
+  <div class="logo">Selvi Home Stay</div>
+
+  <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+  <nav id="mainNav">
     <a href="index.html">Home</a>
     <a href="gallery.html">Photos</a>
     <a href="videos.html">Videos</a>
