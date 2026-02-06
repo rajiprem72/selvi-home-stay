@@ -115,12 +115,14 @@ footer {
   background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
   text-align: center;
   padding: 10px 0;
+  background-size: cover;
+  background-position: center;
 }
 .banner img {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-height: 120px;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
   margin: 0 auto;
   filter: brightness(95%);
