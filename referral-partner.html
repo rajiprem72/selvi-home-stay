@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Referral Partner | Selvi Home Stay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 24px;
+      background: #fff;
+    }
+
+    h1 {
+      color: #b45309;
+      margin-bottom: 8px;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+
+    .steps {
+      background: #fff7ed;
+      padding: 16px;
+      border-left: 4px solid #f59e0b;
+      margin: 20px 0;
+    }
+
+    form {
+      margin-top: 24px;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 24px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #d97706;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #b45309;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #555;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Referral Partner</h1>
+
+  <p>
+    Selvi Home Stay invites well-wishers to support our homestay by sharing a simple
+    coupon code. When a guest books using your coupon code, both the guest and you benefit.
+  </p>
+
+  <div class="steps">
+    <strong>How it works:</strong>
+    <ol>
+      <li>Register as a Referral Partner using the form below</li>
+      <li>You will receive a unique coupon code (example: <b>SHS-4827</b>)</li>
+      <li>We will send you a promotional image with your coupon code printed on it</li>
+      <li>Share the image or coupon code on social media or with friends</li>
+    </ol>
+  </div>
+
+  <h2>Sign Up</h2>
+
+  <form id="referralForm">
+    <label for="name">Name</label>
+    <input type="text" id="name" required>
+
+    <label for="mobile">Mobile Number</label>
+    <input type="tel" id="mobile" required>
+
+    <label for="email">Email ID</label>
+    <input type="email" id="email" required>
+
+    <button type="submit">Register as Referral Partner</button>
+  </form>
+
+  <p class="note">
+    * No investment required. Coupon code is issued after verification.
+  </p>
+
+</div>
+
+<script>
+  document.getElementById("referralForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    // Temporary demo logic
+    const coupon = "SHS-" + Math.floor(1000 + Math.random() * 9000);
+
+    alert(
+      "Thank you for registering!\n\n" +
+      "Your coupon code will be sent to your email.\n\n" +
+      "Generated Code: " + coupon
+    );
+
+    // Later this will be sent to backend
+  });
+</script>
+
+</body>
+</html>
