@@ -234,3 +234,65 @@ input, textarea {
   text-decoration: none;
   font-weight: bold;
 }
+
+.header {
+  background: #d97706;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.logo {
+  color: #fff;
+  font-size: 22px;
+  font-weight: bold;
+  margin-right: 30px;
+}
+
+nav {
+  display: flex;
+  flex: 1;
+  white-space: nowrap;     /* 🔑 single line */
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  margin-right: 18px;
+  font-size: 15px;
+}
+
+.hamburger {
+  display: none;           /* hidden on desktop */
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  nav {
+    display: none;         /* hide menu by default */
+    flex-direction: column;
+    background: #d97706;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    padding: 10px 20px;
+  }
+
+  nav a {
+    padding: 10px 0;
+    margin: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .hamburger {
+    display: block;        /* show hamburger */
+  }
+
+  nav.show {
+    display: flex;
+  }
+}
