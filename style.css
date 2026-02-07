@@ -1,4 +1,98 @@
 /* ===== Selvi Home Stay – Clean Divine Saffron Theme ===== */
+/* ===== HEADER ===== */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  background: #d97706;
+  color: #fff;
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* LEFT BLOCK */
+.header-left {
+  display: flex;
+  align-items: center;
+  margin-right: 30px;
+}
+
+.logo-icon {
+  height: 42px;
+  margin-right: 12px;
+}
+
+.title-block {
+  line-height: 1.2;
+}
+
+.site-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.phone {
+  font-size: 13px;
+}
+
+/* NAV DESKTOP */
+.nav-links {
+  display: flex;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* HAMBURGER */
+.hamburger {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    background: #d97706;
+    padding: 10px 20px;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.25);
+  }
+}
+
 
 /* RESET */
 * {
