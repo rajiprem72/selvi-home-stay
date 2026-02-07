@@ -1,0 +1,32 @@
+<!-- nav.html -->
+<header class="site-header">
+  <div class="header-left">
+    <img src="images/shiva-icon.png" alt="Shiva" class="logo-icon">
+
+    <div class="title-block">
+      <div class="site-title">Selvi Home Stay</div>
+      <div class="phone">+91 98945 35526</div>
+      <div class="phone">+91 77085 82156</div>
+    </div>
+  </div>
+
+  <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+  <nav id="mainNav" class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Photos</a>
+    <a href="videos.html">Videos</a>
+    <a href="places.html">Places to Visit</a>
+    <a href="booking.html">Booking</a>
+    <a href="contact.html">Contact</a>
+    <a href="sitemap.html">Site Map</a>
+    <a href="testimonials.html">Testimonials</a>
+    <a href="referral-partner.html">Referral Partner</a>
+  </nav>
+</header>
+
+<script>
+function toggleMenu() {
+  document.getElementById("mainNav").classList.toggle("show");
+}
+</script>
