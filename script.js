@@ -27,3 +27,10 @@ fetch("nav.html")
     document.getElementById("nav-placeholder").innerHTML = data;
   });
 
+function toggleMenu() {
+  const nav = document.getElementById("mainNav");
+  if (nav) {
+    nav.classList.toggle("show");
+  }
+}
+
