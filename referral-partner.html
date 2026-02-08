@@ -119,7 +119,8 @@
   </p>
 
 </div>
-
+<!--  
+https://script.google.com/macros/s/AKfycbxObm6_XrhzjaLiI_wDP1zRsndnrofNo8t04_DckDlR8_fKncBJL6X7cNlDfaNpQKz_rA/exec  -->
 <script>
 document.getElementById("referralForm").addEventListener("submit", function(e) {
   e.preventDefault();
@@ -136,14 +137,23 @@ document.getElementById("referralForm").addEventListener("submit", function(e) {
   })
   .then(res => res.json())
   .then(result => {
+
+    // ❌ ERROR CASE
+    if (result.success === false) {
+      alert(result.message);
+      return;
+    }
+
+    // ✅ SUCCESS CASE
     alert(
       "Thank you for registering!\n\n" +
       "Your Coupon Code: " + result.coupon +
       "\n\nWe will send you a promotional image shortly."
     );
+
   })
   .catch(() => {
-    alert("Something went wrong. Please try again later.");
+    alert("Server error. Please try again later.");
   });
 });
 </script>
