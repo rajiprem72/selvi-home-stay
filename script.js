@@ -22,10 +22,11 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 fetch("nav.html")
-  .then(res => res.text())
+  .then(response => response.text())
   .then(data => {
     document.getElementById("nav-placeholder").innerHTML = data;
   });
+
 
 function toggleMenu() {
   const nav = document.getElementById("mainNav");
