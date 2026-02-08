@@ -121,21 +121,33 @@
 </div>
 
 <script>
-  document.getElementById("referralForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+document.getElementById("referralForm").addEventListener("submit", function(e) {
+  e.preventDefault();
 
-    // Temporary demo logic
-    const coupon = "SHS-" + Math.floor(1000 + Math.random() * 9000);
+  const data = {
+    name: document.getElementById("name").value,
+    mobile: document.getElementById("mobile").value,
+    email: document.getElementById("email").value
+  };
 
+  fetch("YOUR_WEB_APP_URL", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(result => {
     alert(
       "Thank you for registering!\n\n" +
-      "Your coupon code will be sent to your email.\n\n" +
-      "Generated Code: " + coupon
+      "Your Coupon Code: " + result.coupon +
+      "\n\nWe will send you a promotional image shortly."
     );
-
-    // Later this will be sent to backend
+  })
+  .catch(() => {
+    alert("Something went wrong. Please try again later.");
   });
+});
 </script>
+
 <script src="script.js"></script>
 </body>
 </html>
