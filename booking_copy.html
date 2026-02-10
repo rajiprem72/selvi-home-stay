@@ -28,24 +28,7 @@
 </head>
 
 <body>
-<header>
-  <h1>Selvi Home Stay</h1>
-  <div class="menu-toggle"><span></span><span></span><span></span></div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="gallery.html">Photos</a>
-    <a href="videos.html">Videos</a>
-    <a href="places.html">Places to Visit</a>
-    <a href="booking.html" class="active">Booking</a>
-    <a href="contact.html">Contact</a>
-    <a href="sitemap.html">Site Map</a>
-    <a href="testimonials.html">Testimonials</a>
-  </nav>
-</header>
-
-<div class="banner">
-  <img src="https://selvi-home-stay.in/images/banner.jpg" alt="Selvi Home Stay Rameshwaram">
-</div>
+<div id="nav-placeholder"></div>  
 
 <div class="container">
   <h2>Booking Form</h2>
@@ -148,10 +131,9 @@
 
 <footer>
   © 2025 Selvi Home Stay <br>
-  Designed by <br> Premanandhan Narayanan Chennai <br>
+  Designed by <br> Premanandhan Narayanan , TN <br>
   WhatsApp +91 98844 86609
 </footer>
-
 <script>
 /* CONFIG */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
@@ -235,44 +217,34 @@ function computeToOptions(fromISO, blockedSorted){
 
 /* INIT: load rates and bookings, populate selects */
 (async function init(){
-  // set payment date to today (readonly)
   document.getElementById('PaymentDate').value = toISODate(new Date());
-
   const fromEl = document.getElementById('FromDate');
   const toEl = document.getElementById('ToDate');
 
-  // load rates (no-cache)
   try {
     const r = await fetch(`${APPS_SCRIPT_URL}?action=get_rates`, { cache:'no-store' });
     if (r.ok) {
       const data = await r.json();
       if (data && typeof data.ratePerDay !== 'undefined') RATES = data;
     }
-  } catch (err) {
-    console.warn('Could not load rates, using defaults', err);
-  }
+  } catch (err) { console.warn('Could not load rates', err); }
 
-  // load bookings
   try {
     const r = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`, { cache:'no-store' });
     if (!r.ok) throw new Error('Failed fetching bookings');
     const json = await r.json();
     const bookings = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
-    // blocked set
     const blocked = buildBlockedSet(bookings);
     const blockedSorted = Array.from(blocked).sort();
-
     const availableFrom = computeAvailableFromDates(blocked);
     if (availableFrom.length === 0) {
       fromEl.innerHTML = '<option value="">No dates available</option>';
       fromEl.disabled = true;
       return;
     }
-
     fromEl.innerHTML = '<option value="">Select check-in date</option>' +
                        availableFrom.map(d => `<option value="${d}">${d}</option>`).join('');
     fromEl.disabled = false;
-
     fromEl.addEventListener('change', () => {
       const start = fromEl.value;
       document.getElementById('priceInfo').innerHTML = '';
@@ -290,10 +262,8 @@ function computeToOptions(fromISO, blockedSorted){
       toEl.innerHTML = '<option value="">Select checkout date</option>' +
                        toOptions.map(d => `<option value="${d}">${d}</option>`).join('');
       toEl.disabled = false;
-      // ensure the listener is fresh
       toEl.onchange = () => showPrice(start, toEl.value);
     });
-
   } catch (err) {
     console.error('Failed to load bookings', err);
     fromEl.innerHTML = '<option value="">Unable to load dates</option>';
@@ -301,8 +271,8 @@ function computeToOptions(fromISO, blockedSorted){
   }
 })();
 
-/* SUBMIT: popup flow (Apps Script returns HTML that posts postMessage to opener/top) */
-(function setupSubmitPopup(){
+/* ✅ SUBMIT + POPUP HANDLER */
+(function setupSubmitPopup() {
   const form = document.getElementById('bookingForm');
   const btn = document.getElementById('submitBtn');
   const confirmationArea = document.getElementById('confirmationArea');
@@ -310,104 +280,92 @@ function computeToOptions(fromISO, blockedSorted){
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-
     if (!document.getElementById('rulesAgree').checked) {
       alert('Please agree to the Rules & Regulations before submitting.');
       return;
     }
-
-    // Basic validation for dates
-    const f = form.FromDate && form.FromDate.value;
-    const t = form.ToDate && form.ToDate.value;
+    const f = form.FromDate?.value, t = form.ToDate?.value;
     if (!f || !t || t <= f) {
       alert('Please choose valid From and To dates.');
       return;
     }
-
-    // open small centered popup
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
     const w = 420, h = 460;
     const left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
     const top = window.screenY + Math.max(0, (window.outerHeight - h) / 2);
-    const popup = window.open('', 'SelviPopup',
-      `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
-
+    const popup = window.open('', 'SelviPopup', `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
     if (!popup) {
       alert('Please allow pop-ups for this website to continue your booking.');
+      btn.disabled = false;
+      btn.textContent = 'Submit Booking';
       return;
     }
-
     window._selviPopupRef = popup;
     form.target = 'SelviPopup';
-
-    btn.disabled = true;
-    btn.textContent = 'Submitting…';
-
-    // submit form into the popup; Apps Script must return HTML that calls window.top.postMessage(...)
     form.submit();
 
-    // fallback timeout: if nothing back in 12s show message and re-enable
-    const fallback = setTimeout(() => {
-      if (btn.disabled) {
-        confirmationArea.className = 'notice-error';
-        confirmationArea.textContent = '❌ Network or server error. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Submit Booking';
-        try { if (window._selviPopupRef) window._selviPopupRef.close(); } catch(_) {}
+    // ✅ Detect if popup manually closed
+    const popupMonitor = setInterval(() => {
+      if (!window._selviPopupRef || window._selviPopupRef.closed) {
+        clearInterval(popupMonitor);
+        window.location.href = 'index.html';
       }
-    }, 12000);
+    }, 1000);
 
-    // Listen for a successful message once (handler below clears popup and fallback)
-    const onceListener = (event) => {
-      // handled by secure message listener below, but we still clear fallback and cleanup here
-      clearTimeout(fallback);
-      window.removeEventListener('message', onceListener);
-    };
-    window.addEventListener('message', onceListener, false);
+    // ✅ Auto-timeout fallback
+    setTimeout(() => {
+      if (!window._selviPopupRef || window._selviPopupRef.closed) return;
+      try { window._selviPopupRef.close(); } catch (_) {}
+      window._selviPopupRef = null;
+      window.location.href = 'index.html';
+    }, 15000);
   });
 })();
 
-/* SECURE message listener - only accept from Apps Script origins */
-(function secureMessageListener(){
-  const TRUSTED = new Set([
-    'https://script.google.com',
-    'https://script.googleusercontent.com'
-  ]);
-
+/* ✅ SECURE MESSAGE LISTENER */
+(function secureMessageListener() {
+  const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
+  let bookingHandled = false;
   window.addEventListener('message', (event) => {
     try {
       const origin = (event.origin || '').toLowerCase();
-      if (!TRUSTED.has(origin)) return;
+      if (!TRUSTED_ORIGINS.has(origin)) return;
     } catch (err) { return; }
-
     const data = event.data;
-    if (!data || typeof data !== 'object' || typeof data.success !== 'boolean') return;
-
+    if (bookingHandled) return;
+    if (!data || typeof data !== 'object') return;
+    if (!('success' in data) || typeof data.success !== 'boolean') return;
+    bookingHandled = true;
     const form = document.getElementById('bookingForm');
-    const btn = document.getElementById('submitBtn');
+    const submitBtn = document.getElementById('submitBtn');
     const confirmationArea = document.getElementById('confirmationArea');
-
     if (data.success) {
       confirmationArea.className = 'notice-success';
       confirmationArea.innerHTML = `
         <div>✅ <b>Booking Confirmed!</b></div>
         <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
-        <div>We will contact you via Phone / WhatsApp / Email.</div>
-      `;
-      // disable form to prevent re-submit
+        <div>We’ll contact you via Phone / WhatsApp / Email.</div>
+        <div>This window will close automatically in 15 seconds. Kindly wait.....</div>
+       `;
       [...form.elements].forEach(el => el.disabled = true);
-      btn.textContent = 'Submitted';
+      submitBtn.disabled = true;
+      if (typeof fbq === 'function') fbq('track','Lead');
     } else {
       confirmationArea.className = 'notice-error';
       confirmationArea.textContent = data.error || '❌ Booking failed. Please try again.';
-      btn.disabled = false;
-      btn.textContent = 'Submit Booking';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Booking';
     }
-
-    // close popup if open
-    try { if (window._selviPopupRef) { window._selviPopupRef.close(); window._selviPopupRef = null; } } catch(_) {}
+    try {
+      if (window._selviPopupRef && !window._selviPopupRef.closed) {
+        window._selviPopupRef.close();
+      }
+      window._selviPopupRef = null;
+    } catch (_) {}
   }, false);
 })();
 </script>
-
+<script src="script.js"></script>
 </body>
 </html>
