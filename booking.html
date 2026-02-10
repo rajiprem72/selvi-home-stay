@@ -24,6 +24,23 @@
   }
   .btn[disabled]{ opacity:.6; cursor:not-allowed; }
   .pay-link { margin-top:10px; display:inline-block; font-weight:bold; color:#065f46; }
+
+  .notice-error {
+  margin-top:15px;
+  padding:12px;
+  border-radius:8px;
+  background:#fef2f2;
+  border:1px solid #fecaca;
+  color:#7f1d1d;
+}
+.notice-success {
+  margin-top:15px;
+  padding:12px;
+  border-radius:8px;
+  background:#ecfdf5;
+  border:1px solid #a7f3d0;
+  color:#065f46;
+}
 </style>
 </head>
 
@@ -32,102 +49,75 @@
 
 <div class="container">
   <h2>Booking Form</h2>
+<form id="bookingForm"
+      method="POST"
+      action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec">
 
-  <form id="bookingForm" method="POST"
-        action="https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec">
-    <input type="hidden" name="action" value="create_booking">
-    <input type="hidden" name="Source" value="Website">
+<input type="hidden" name="action" value="create_booking">
+<input type="hidden" name="Source" value="Website">
 
-    <label>Name
-      <input type="text" name="Name" placeholder="e.g. Name as in Aadhaar Card" required>
-    </label>
+<label>Name
+  <input type="text" name="Name" required>
+</label>
 
-    <label>Aadhaar Number
-      <input type="text" name="Aadhaar" placeholder="e.g. 123412341234" required>
-    </label>
+<label>Aadhaar Number
+  <input type="text" name="Aadhaar" required>
+</label>
 
-    <label>Mobile Number
-      <input type="text" name="Mobile" placeholder="e.g. 9123412345" required>
-    </label>
+<label>Mobile Number
+  <input type="text" name="Mobile" required>
+</label>
 
-    <label>Address
-      <textarea name="Address" rows="2" placeholder="e.g. 12/3 Beach Road, Chennai, Tamil Nadu" required></textarea>
-    </label>
+<label>Address
+  <textarea name="Address" rows="2" required></textarea>
+</label>
 
-    <div class="form-row">
-      <label style="flex:1">From Date
-        <select name="FromDate" id="FromDate" required disabled>
-          <option value="">Loading available dates…</option>
-        </select>
-      </label>
+<label>From Date
+  <input type="date" name="FromDate" required>
+</label>
 
-      <label style="flex:1">To Date
-        <select name="ToDate" id="ToDate" required disabled>
-          <option value="">Select From Date first</option>
-        </select>
-      </label>
-    </div>
+<label>To Date
+  <input type="date" name="ToDate" required>
+</label>
 
-    <div id="priceInfo" class="price"></div>
+<label>Members
+  <select name="Members" required>
+    <option value="">Select</option>
+    <option>3</option><option>4</option><option>5</option>
+    <option>6</option><option>7</option><option>8</option>
+    <option>9</option><option>10</option>
+  </select>
+</label>
 
-    <div class="form-row">
-      <label style="flex:1">Payment Date
-        <input type="date" name="PaymentDate" id="PaymentDate" readonly required>
-      </label>
-      <div style="flex:1;display:flex;align-items:center;" class="muted">
-        If payment was made earlier, mention actual date in Message.
-      </div>
-    </div>
+<label>WhatsApp Number
+  <input type="text" name="Whatsapp">
+</label>
 
-    <label>Payment Reference Number
-      <input type="text" name="PaymentRefNo" placeholder="e.g. 123456789012" required>
-    </label>
+<label>Email
+  <input type="email" name="Email">
+</label>
 
-    <label>Payment Amount (₹)
-      <input type="number" name="PaymentAmount" placeholder="e.g. Minimum ₹1000/day" required>
-    </label>
+<label>Coupon Code
+  <input type="text" name="CouponCode" id="CouponCode" placeholder="Optional">
+</label>
 
-    <div class="form-row" style="align-items:flex-end;">
-      <label style="flex:1">Members
-        <select name="Members" id="Members" required>
-          <option value="">Select Members (3–10)</option>
-          <option>3</option><option>4</option><option>5</option><option>6</option>
-          <option>7</option><option>8</option><option>9</option><option>10</option>
-        </select>
-      </label>
-      <div style="flex:1;padding:6px 8px;" class="muted">
-        Maximum <b>8 Adults + 2 Children</b>.
-      </div>
-    </div>
+<label>Message
+  <textarea name="Message" rows="3"></textarea>
+</label>
 
-    <label>WhatsApp Number <span class="muted">(optional)</span>
-      <input type="text" name="Whatsapp">
-    </label>
-
-    <label>Email <span class="muted">(optional)</span>
-      <input type="email" name="Email">
-    </label>
-
-    <label>Message
-      <textarea name="Message" rows="3"></textarea>
-    </label>
-
-    <div style="margin:15px 0;padding:10px;border:1px solid #ccc;background:#f9f9f9;border-radius:6px;">
-      <p><strong>Rules & Regulations:</strong></p>
-      <ul style="margin:0 0 6px 20px;padding:0;list-style-type:disc;">
-        <li>No non-vegetarian food allowed inside.</li>
-        <li>Smoking or drinking alcohol is strictly prohibited.</li>
-      </ul>
-      <label>
-        <input type="checkbox" id="rulesAgree" required>
-        I have read and agree to the Rules & Regulations.
-      </label>
-    </div>
-
-    <button id="submitBtn" type="submit" class="btn">Submit Booking</button>
-    <div id="confirmationArea"></div>
-  </form>
+<div style="margin:15px 0">
+  <label>
+    <input type="checkbox" id="rulesAgree" required>
+    I agree to the Rules & Regulations
+  </label>
 </div>
+
+<button type="submit" id="submitBtn">Submit Booking</button>
+
+<div id="formMessage"></div>
+
+</form>
+ </div>
 
 <footer>
   © 2025 Selvi Home Stay <br>
@@ -366,6 +356,49 @@ function computeToOptions(fromISO, blockedSorted){
   }, false);
 })();
 </script>
+<script>
+const APPS_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbxvdeGzk4LSpRbk-AzegMScBzRKNwiXaAO5tkYn5X-r8s1gjwFzdjiMvBHZy1OZpt96/exec";
+
+document.getElementById('bookingForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const msgBox = document.getElementById('formMessage');
+  msgBox.innerHTML = '';
+
+  if (!document.getElementById('rulesAgree').checked) {
+    alert("Please agree to the rules.");
+    return;
+  }
+
+  const coupon = document.getElementById('CouponCode').value.trim();
+
+  // ✅ Validate coupon ONLY if entered
+  if (coupon !== '') {
+    try {
+      const res = await fetch(
+        `${APPS_SCRIPT_URL}?action=validate_coupon&coupon=${encodeURIComponent(coupon)}`,
+        { cache:'no-store' }
+      );
+      const data = await res.json();
+
+      if (!data.valid) {
+        msgBox.className = 'notice-error';
+        msgBox.innerText = data.message || 'Invalid coupon code';
+        return;
+      }
+    } catch (err) {
+      msgBox.className = 'notice-error';
+      msgBox.innerText = 'Unable to validate coupon. Please try again.';
+      return;
+    }
+  }
+
+  // ✅ Coupon valid OR not entered → submit form
+  this.submit();
+});
+</script>
+  
 <script src="script.js"></script>
 </body>
 </html>
