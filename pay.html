@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Complete Payment — Selvi Home Stay</title>
+
+<link rel="stylesheet" href="https://selvi-home-stay.in/style.css">
+
+<style>
+.summary {
+  background:#f9fafb;
+  padding:20px;
+  border-radius:12px;
+  margin:20px 0;
+}
+.amount {
+  font-size:20px;
+  font-weight:bold;
+}
+button {
+  margin:10px 5px 0 0;
+}
+.notice {
+  margin-top:20px;
+  padding:12px;
+  border-radius:8px;
+}
+.notice-error {
+  background:#fef2f2;
+  color:#7f1d1d;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2>Complete Your Booking Payment</h2>
+
+<div id="content"></div>
+
+</div>
+
+<script>
+
+const APPS_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+
+const urlParams = new URLSearchParams(window.location.search);
+const bookingId = urlParams.get("bookingId");
+
+if (!bookingId) {
+  document.getElementById("content").innerHTML =
+    "<div class='notice notice-error'>Invalid payment link.</div>";
+} else {
+  loadBooking();
+}
+
+async function loadBooking() {
+
+  const res = await fetch(
+    APPS_SCRIPT_URL + "?action=get_booking_details&bookingId=" + bookingId
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    document.getElementById("content").innerHTML =
+      "<div class='notice notice-error'>" + data.error + "</div>";
+    return;
+  }
+
+  renderBooking(data);
+}
+
+function renderBooking(data) {
+
+  const html = `
+  <div class="summary">
+    <p><strong>Booking ID:</strong> ${data.bookingId}</p>
+    <p><strong>Name:</strong> ${data.name}</p>
+    <p><strong>Days:</strong> ${data.days}</p>
+    <p><strong>Total Amount:</strong> ₹${data.baseAmount}</p>
+    <p><strong>Discount:</strong> ₹${data.discount}</p>
+    <p class="amount">Net Payable: ₹${data.netAmount}</p>
+    <p><strong>Advance Required:</strong> ₹${data.advanceRequired}</p>
+    <p><strong>Paid So Far:</strong> ₹${data.paidSoFar}</p>
+    <p><strong>Balance:</strong> ₹${data.balance}</p>
+  </div>
+
+  <button onclick="pay(${data.advanceRequired})">
+    Pay Advance ₹${data.advanceRequired}
+  </button>
+
+  <button onclick="pay(${data.netAmount})">
+    Pay Full ₹${data.netAmount}
+  </button>
+  `;
+
+  document.getElementById("content").innerHTML = html;
+}
+
+function pay(amount) {
+  alert("Next step: Razorpay integration for ₹" + amount);
+}
+
+</script>
+
+</body>
+</html>
