@@ -5,100 +5,68 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Booking — Selvi Home Stay</title>
 
-<link rel="icon" type="image/png" href="https://selvi-home-stay.in/images/favicon.png">
 <link rel="stylesheet" href="https://selvi-home-stay.in/style.css">
 
 <style>
-  .form-row { display:flex; gap:12px; flex-wrap:wrap; }
-  label { display:block; }
-  .muted { color:#6b7280; font-size:.92rem; }
-  .price { margin:8px 0; font-size:0.95rem; line-height:1.4; }
-  .banner img { width:100%; height:auto; display:block; }
-  .notice-success {
-    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
-    background: #ecfdf5; border: 1px solid #a7f3d0; color:#065f46;
-  }
-  .notice-error {
-    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
-    background: #fef2f2; border: 1px solid #fecaca; color:#7f1d1d;
-  }
-  .btn[disabled]{ opacity:.6; cursor:not-allowed; }
-  .pay-link { margin-top:10px; display:inline-block; font-weight:bold; color:#065f46; }
-
-  .notice-error {
-  margin-top:15px;
-  padding:12px;
-  border-radius:8px;
-  background:#fef2f2;
-  border:1px solid #fecaca;
-  color:#7f1d1d;
-}
 .notice-success {
-  margin-top:15px;
-  padding:12px;
-  border-radius:8px;
-  background:#ecfdf5;
-  border:1px solid #a7f3d0;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
   color:#065f46;
 }
+.notice-error {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color:#7f1d1d;
+}
+.btn[disabled] {
+  opacity:.6;
+  cursor:not-allowed;
+}
+.workflow {
+  margin:25px 0;
+  padding:18px;
+  border:1px solid #e5e7eb;
+  background:#f9fafb;
+  border-radius:12px;
+}
+.workflow h3 { margin-top:0; }
+.workflow ol { padding-left:20px; line-height:1.7; }
+.muted { color:#6b7280; font-size:.92rem; }
 </style>
 </head>
 
 <body>
-<div id="nav-placeholder"></div>  
-<!-- BOOKING WORKFLOW -->
-<section style="margin:25px 0;padding:18px;border:1px solid #e5e7eb;
-               background:#f9fafb;border-radius:12px;">
+<div class="container">
 
-  <h3 style="margin-top:0;">🧾 How Booking & Payment Works</h3>
+<h2>Booking Form</h2>
 
-  <ol style="padding-left:20px;line-height:1.7;">
-    <li>
-      <b>Submit your basic details</b><br>
-      <span style="color:#6b7280;">
-        Fill in your stay dates, number of members, and contact information.
-      </span>
+<!-- WORKFLOW SECTION -->
+<div class="workflow">
+  <h3>🧾 How Booking & Payment Works</h3>
+  <ol>
+    <li><b>Submit your basic details</b><br>
+      <span class="muted">Enter your stay dates and contact information.</span>
     </li>
-
-    <li>
-      <b>Receive payment details by Email</b><br>
-      <span style="color:#6b7280;">
-        After submission, you will receive a secure payment link from us.
-      </span>
+    <li><b>Receive secure payment link by Email</b><br>
+      <span class="muted">We will send you payment details immediately after booking.</span>
     </li>
-
-    <li>
-      <b>Make your payment online</b><br>
-      <span style="color:#6b7280;">
-        You can pay either the advance amount or the full amount using Razorpay.
-      </span>
+    <li><b>Make advance or full payment online</b><br>
+      <span class="muted">Payments are securely processed via Razorpay.</span>
     </li>
-
-    <li>
-      <b>Visit Selvi Home Stay on your booking date</b><br>
-      <span style="color:#6b7280;">
-        Carry your booking confirmation when you arrive.
-      </span>
-    </li>
-
-    <li>
-      <b>Pay the remaining balance (if any)</b><br>
-      <span style="color:#6b7280;">
-        Balance payment can be completed online or at the property before check-out.
-      </span>
+    <li><b>Visit Selvi Home Stay on your booking date</b></li>
+    <li><b>Pay remaining balance (if any)</b><br>
+      <span class="muted">Balance can be paid before or during stay.</span>
     </li>
   </ol>
+</div>
 
-  <div style="margin-top:12px;font-size:0.92rem;color:#065f46;">
-    ✅ Secure payments &nbsp;|&nbsp; ✅ Transparent pricing &nbsp;|&nbsp; ✅ No hidden charges
-  </div>
-</section>
-<!-- https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec  -->
-<div class="container">
-  <h2>Booking Form</h2>
-<form id="bookingForm"
-      method="POST"
-      action="https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec">
+<form id="bookingForm">
 
 <input type="hidden" name="action" value="create_booking">
 <input type="hidden" name="Source" value="Website">
@@ -144,8 +112,8 @@
   <input type="email" name="Email">
 </label>
 
-<label>Coupon Code
-  <input type="text" name="CouponCode" id="CouponCode" placeholder="Optional">
+<label>Coupon Code (optional)
+  <input type="text" name="CouponCode" id="CouponCode">
 </label>
 
 <label>Message
@@ -159,293 +127,89 @@
   </label>
 </div>
 
-<button type="submit" id="submitBtn">Submit Booking</button>
+<button type="submit" id="submitBtn" class="btn">Submit Booking</button>
 
 <div id="formMessage"></div>
 
 </form>
- </div>
+</div>
 
-<footer>
-  © 2025 Selvi Home Stay <br>
-  Designed by <br> Premanandhan Narayanan , TN <br>
-  WhatsApp +91 98844 86609
-</footer>
-<script>
-/* CONFIG */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
-const DAYS_WINDOW = 60;
-
-/* HELPERS */
-const pad2 = n => (n<10 ? '0'+n : ''+n);
-function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
-function addDays(dt,n){ const x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()); x.setDate(x.getDate()+n); return x; }
-function parseISO(s){ const [y,m,d] = (s||'').split('-').map(Number); return new Date(y,m-1,d); }
-
-/* STATE */
-let RATES = { ratePerDay: 4760, gstPercent: 5, basePerDay: 1000 }; // fallback defaults
-
-/* UI functions */
-function showPrice(fromISO, toISO) {
-  const el = document.getElementById('priceInfo');
-  if (!fromISO || !toISO) { el.innerHTML=''; return; }
-  const nights = (parseISO(toISO) - parseISO(fromISO)) / (1000*60*60*24);
-  if (nights <= 0) { el.innerHTML=''; return; }
-
-  const perDay = Number(RATES.ratePerDay);
-  const gstPct = Number(RATES.gstPercent);
-  const basePerDay = Number(RATES.basePerDay);
-
-  const baseTotal = basePerDay * nights;
-  const fullSubtotal = perDay * nights;
-  const gstAmount = Math.round(fullSubtotal * gstPct / 100);
-  const fullTotal = fullSubtotal + gstAmount;
-
-  el.innerHTML = `
-    <div><b>Stay:</b> ${nights} night(s)</div>
-    <div>Advance: ₹${basePerDay} × ${nights} = <b>₹${baseTotal}</b></div>
-    <div>Full (per day): ₹${perDay}</div>
-    <div>GST @ ${gstPct}% = ₹${gstAmount}</div>
-    <div><b>Total: ₹${fullTotal}</b></div>
-    <a class="pay-link" href="payments.html" target="_blank">➡ Proceed to Payment</a>
-  `;
-}
-
-/* Build blocked date set & helpers for options */
-function buildBlockedSet(bookings){
-  const blocked = new Set();
-  bookings.forEach(b => {
-    const f = parseISO(b.FromDate); const t = parseISO(b.ToDate);
-    if (isNaN(f) || isNaN(t)) return;
-    for (let d = new Date(f); d < t; d.setDate(d.getDate()+1)) {
-      blocked.add(toISODate(d));
-    }
-  });
-  return blocked;
-}
-function computeAvailableFromDates(blocked){
-  const start = new Date(); start.setHours(0,0,0,0);
-  const end = addDays(start, DAYS_WINDOW);
-  const out = [];
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
-    const iso = toISODate(d);
-    if (!blocked.has(iso)) out.push(iso);
-  }
-  return out;
-}
-function computeToOptions(fromISO, blockedSorted){
-  const today = new Date(); today.setHours(0,0,0,0);
-  const windowEnd = addDays(today, DAYS_WINDOW);
-  let nextBlocked = null;
-  for (const iso of blockedSorted) {
-    if (iso > fromISO) { nextBlocked = iso; break; }
-  }
-  let endBoundary = windowEnd;
-  if (nextBlocked) {
-    const nb = parseISO(nextBlocked);
-    if (nb < endBoundary) endBoundary = nb;
-  }
-  const arr = [];
-  for (let d = addDays(parseISO(fromISO), 1); d <= endBoundary; d.setDate(d.getDate()+1)) {
-    arr.push(toISODate(d));
-  }
-  return arr;
-}
-
-/* INIT: load rates and bookings, populate selects */
-(async function init(){
-  document.getElementById('PaymentDate').value = toISODate(new Date());
-  const fromEl = document.getElementById('FromDate');
-  const toEl = document.getElementById('ToDate');
-
-  try {
-    const r = await fetch(`${APPS_SCRIPT_URL}?action=get_rates`, { cache:'no-store' });
-    if (r.ok) {
-      const data = await r.json();
-      if (data && typeof data.ratePerDay !== 'undefined') RATES = data;
-    }
-  } catch (err) { console.warn('Could not load rates', err); }
-
-  try {
-    const r = await fetch(`${APPS_SCRIPT_URL}?action=get_bookings`, { cache:'no-store' });
-    if (!r.ok) throw new Error('Failed fetching bookings');
-    const json = await r.json();
-    const bookings = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
-    const blocked = buildBlockedSet(bookings);
-    const blockedSorted = Array.from(blocked).sort();
-    const availableFrom = computeAvailableFromDates(blocked);
-    if (availableFrom.length === 0) {
-      fromEl.innerHTML = '<option value="">No dates available</option>';
-      fromEl.disabled = true;
-      return;
-    }
-    fromEl.innerHTML = '<option value="">Select check-in date</option>' +
-                       availableFrom.map(d => `<option value="${d}">${d}</option>`).join('');
-    fromEl.disabled = false;
-    fromEl.addEventListener('change', () => {
-      const start = fromEl.value;
-      document.getElementById('priceInfo').innerHTML = '';
-      if (!start) {
-        toEl.innerHTML = '<option value="">Select From Date first</option>';
-        toEl.disabled = true;
-        return;
-      }
-      const toOptions = computeToOptions(start, blockedSorted);
-      if (toOptions.length === 0) {
-        toEl.innerHTML = `<option value="">No valid To Date after ${start}</option>`;
-        toEl.disabled = true;
-        return;
-      }
-      toEl.innerHTML = '<option value="">Select checkout date</option>' +
-                       toOptions.map(d => `<option value="${d}">${d}</option>`).join('');
-      toEl.disabled = false;
-      toEl.onchange = () => showPrice(start, toEl.value);
-    });
-  } catch (err) {
-    console.error('Failed to load bookings', err);
-    fromEl.innerHTML = '<option value="">Unable to load dates</option>';
-    fromEl.disabled = true;
-  }
-})();
-
-/* ✅ SUBMIT + POPUP HANDLER */
-(function setupSubmitPopup() {
-  const form = document.getElementById('bookingForm');
-  const btn = document.getElementById('submitBtn');
-  const confirmationArea = document.getElementById('confirmationArea');
-  window._selviPopupRef = null;
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!document.getElementById('rulesAgree').checked) {
-      alert('Please agree to the Rules & Regulations before submitting.');
-      return;
-    }
-    const f = form.FromDate?.value, t = form.ToDate?.value;
-    if (!f || !t || t <= f) {
-      alert('Please choose valid From and To dates.');
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = 'Submitting…';
-    const w = 420, h = 460;
-    const left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
-    const top = window.screenY + Math.max(0, (window.outerHeight - h) / 2);
-    const popup = window.open('', 'SelviPopup', `width=${w},height=${h},top=${top},left=${left},resizable=no,scrollbars=yes`);
-    if (!popup) {
-      alert('Please allow pop-ups for this website to continue your booking.');
-      btn.disabled = false;
-      btn.textContent = 'Submit Booking';
-      return;
-    }
-    window._selviPopupRef = popup;
-    form.target = 'SelviPopup';
-    form.submit();
-
-    // ✅ Detect if popup manually closed
-    const popupMonitor = setInterval(() => {
-      if (!window._selviPopupRef || window._selviPopupRef.closed) {
-        clearInterval(popupMonitor);
-        window.location.href = 'index.html';
-      }
-    }, 1000);
-
-    // ✅ Auto-timeout fallback
-    setTimeout(() => {
-      if (!window._selviPopupRef || window._selviPopupRef.closed) return;
-      try { window._selviPopupRef.close(); } catch (_) {}
-      window._selviPopupRef = null;
-      window.location.href = 'index.html';
-    }, 15000);
-  });
-})();
-
-/* ✅ SECURE MESSAGE LISTENER */
-(function secureMessageListener() {
-  const TRUSTED_ORIGINS = new Set(['https://script.google.com']);
-  let bookingHandled = false;
-  window.addEventListener('message', (event) => {
-    try {
-      const origin = (event.origin || '').toLowerCase();
-      if (!TRUSTED_ORIGINS.has(origin)) return;
-    } catch (err) { return; }
-    const data = event.data;
-    if (bookingHandled) return;
-    if (!data || typeof data !== 'object') return;
-    if (!('success' in data) || typeof data.success !== 'boolean') return;
-    bookingHandled = true;
-    const form = document.getElementById('bookingForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const confirmationArea = document.getElementById('confirmationArea');
-    if (data.success) {
-      confirmationArea.className = 'notice-success';
-      confirmationArea.innerHTML = `
-        <div>✅ <b>Booking Confirmed!</b></div>
-        <div>Your Booking ID: <b>${data.bookingId || 'N/A'}</b></div>
-        <div>We’ll contact you via Phone / WhatsApp / Email.</div>
-        <div>This window will close automatically in 15 seconds. Kindly wait.....</div>
-       `;
-      [...form.elements].forEach(el => el.disabled = true);
-      submitBtn.disabled = true;
-      if (typeof fbq === 'function') fbq('track','Lead');
-    } else {
-      confirmationArea.className = 'notice-error';
-      confirmationArea.textContent = data.error || '❌ Booking failed. Please try again.';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Booking';
-    }
-    try {
-      if (window._selviPopupRef && !window._selviPopupRef.closed) {
-        window._selviPopupRef.close();
-      }
-      window._selviPopupRef = null;
-    } catch (_) {}
-  }, false);
-})();
-</script>
 <script>
 const APPS_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
 
-document.getElementById('bookingForm').addEventListener('submit', async function(e){
+document.getElementById("bookingForm").addEventListener("submit", async function(e) {
+
   e.preventDefault();
 
-  const msgBox = document.getElementById('formMessage');
-  msgBox.innerHTML = '';
+  const msgBox = document.getElementById("formMessage");
+  const submitBtn = document.getElementById("submitBtn");
 
-  if (!document.getElementById('rulesAgree').checked) {
+  msgBox.innerHTML = "";
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
+  if (!document.getElementById("rulesAgree").checked) {
     alert("Please agree to the rules.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit Booking";
     return;
   }
 
-  const coupon = document.getElementById('CouponCode').value.trim();
+  try {
 
-  // ✅ Validate coupon ONLY if entered
-  if (coupon !== '') {
-    try {
+    const formData = new FormData(this);
+    const payload = Object.fromEntries(formData.entries());
+
+    // 🔹 Validate Coupon (if entered)
+    if (payload.CouponCode && payload.CouponCode.trim() !== "") {
+
       const res = await fetch(
-        `${APPS_SCRIPT_URL}?action=validate_coupon&coupon=${encodeURIComponent(coupon)}`,
-        { cache:'no-store' }
+        APPS_SCRIPT_URL + "?action=validate_coupon&coupon=" +
+        encodeURIComponent(payload.CouponCode)
       );
-      const data = await res.json();
 
-      if (!data.valid) {
-        msgBox.className = 'notice-error';
-        msgBox.innerText = data.message || 'Invalid coupon code';
+      const couponResult = await res.json();
+
+      if (!couponResult.valid) {
+        msgBox.className = "notice-error";
+        msgBox.innerHTML = "❌ Invalid coupon code.";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Booking";
         return;
       }
-    } catch (err) {
-      msgBox.className = 'notice-error';
-      msgBox.innerText = 'Unable to validate coupon. Please try again.';
-      return;
     }
+
+    // 🔹 Submit Booking
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      msgBox.className = "notice-success";
+      msgBox.innerHTML =
+        "✅ Booking Created Successfully!<br><br>" +
+        "Your Booking ID: <b>" + result.bookingId + "</b><br>" +
+        "Payment details will be sent to your Email shortly.";
+      this.reset();
+    } else {
+      msgBox.className = "notice-error";
+      msgBox.innerHTML = "❌ " + result.error;
+    }
+
+  } catch (err) {
+    msgBox.className = "notice-error";
+    msgBox.innerHTML = "❌ Something went wrong. Please try again.";
   }
 
-  // ✅ Coupon valid OR not entered → submit form
-  this.submit();
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submit Booking";
 });
 </script>
-  
-<script src="script.js"></script>
+
 </body>
 </html>
