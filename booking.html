@@ -183,9 +183,9 @@ document.getElementById("bookingForm").addEventListener("submit", async function
     // 🔹 Submit Booking
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: new URLSearchParams(payload)
     });
+
 
     const result = await response.json();
 
