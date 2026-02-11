@@ -202,9 +202,10 @@ document.getElementById("bookingForm").addEventListener("submit", async function
     }
 
   } catch (err) {
-    msgBox.className = "notice-error";
-    msgBox.innerHTML = "❌ Something went wrong. Please try again.";
-  }
+  msgBox.className = "notice-error";
+  msgBox.innerHTML = "❌ " + err.message;
+}
+
 
   submitBtn.disabled = false;
   submitBtn.textContent = "Submit Booking";
