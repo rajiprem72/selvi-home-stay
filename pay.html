@@ -76,10 +76,26 @@ async function loadBooking() {
 
 function renderBooking(data) {
 
+  function formatDate(dateStr) {
+  if (!dateStr) return "-";
+
+  const d = new Date(dateStr);
+  if (isNaN(d)) return "-";
+
+  return d.toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
   const html = `
   <div class="summary">
     <p><strong>Booking ID:</strong> ${data.bookingId}</p>
     <p><strong>Name:</strong> ${data.name}</p>
+    <p><strong>From Date:</strong> ${formatDate(data.fromDate)}</p>
+    <p><strong>To Date:</strong> ${formatDate(data.toDate)}</p>
     <p><strong>Days:</strong> ${data.days}</p>
     <p><strong>Total Amount:</strong> ₹${data.baseAmount}</p>
     <p><strong>Discount:</strong> ₹${data.discount}</p>
