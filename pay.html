@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Complete Payment — Selvi Home Stay</title>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <link rel="stylesheet" href="https://selvi-home-stay.in/style.css">
 
 <style>
@@ -105,12 +105,12 @@ function renderBooking(data) {
     <p><strong>Balance:</strong> ₹${data.balance}</p>
   </div>
 
-  <button onclick="pay(${data.advanceRequired})">
-    Pay Advance ₹${data.advanceRequired}
+  <button onclick="pay('advance')">
+    Pay Advance ₹1 (Test)
   </button>
 
-  <button onclick="pay(${data.netAmount})">
-    Pay Full ₹${data.netAmount}
+  <button onclick="pay('full')">
+    Pay Full ₹2 (Test)
   </button>
   `;
 
