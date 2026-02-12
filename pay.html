@@ -117,6 +117,8 @@ function renderBooking(data) {
   document.getElementById("content").innerHTML = html;
 }
 
+
+//rzp_test_SFC8RWThE195Ua  
 async function pay(type) {
 
   const res = await fetch(APPS_SCRIPT_URL, {
@@ -131,17 +133,19 @@ async function pay(type) {
   const order = await res.json();
 
   if (!order.id) {
-    alert("Error creating order");
+    alert("Order creation failed");
+    console.log(order);
     return;
   }
 
   const options = {
-    key: "rzp_test_SFC8RWThE195Ua",
+    key: "rzp_test_SFC8RWThE195Ua",  // only KEY ID here
     amount: order.amount,
     currency: "INR",
     name: "Selvi Home Stay",
     description: "Booking Payment",
     order_id: order.id,
+
     handler: function (response) {
       alert("Payment Successful\nPayment ID: " + response.razorpay_payment_id);
     }
@@ -150,7 +154,6 @@ async function pay(type) {
   const rzp = new Razorpay(options);
   rzp.open();
 }
-
 
 </script>
 
