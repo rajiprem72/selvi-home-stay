@@ -117,9 +117,40 @@ function renderBooking(data) {
   document.getElementById("content").innerHTML = html;
 }
 
-function pay(amount) {
-  alert("Next step: Razorpay integration for ₹" + amount);
+async function pay(type) {
+
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "create_razorpay_order",
+      bookingId: bookingId,
+      paymentType: type
+    })
+  });
+
+  const order = await res.json();
+
+  if (!order.id) {
+    alert("Error creating order");
+    return;
+  }
+
+  const options = {
+    key: "YOUR_TEST_KEY_ID",
+    amount: order.amount,
+    currency: "INR",
+    name: "Selvi Home Stay",
+    description: "Booking Payment",
+    order_id: order.id,
+    handler: function (response) {
+      alert("Payment Successful\nPayment ID: " + response.razorpay_payment_id);
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
 }
+
 
 </script>
 
