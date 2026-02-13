@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Update Payments - Selvi Home Stay</title>
+<style>
+body { font-family: Arial; max-width: 500px; margin: 40px auto; }
+input, select, button { width: 100%; padding: 8px; margin: 8px 0; }
+.notice { padding:10px; margin-top:10px; border-radius:6px; }
+.success { background:#e6fffa; border:1px solid #38b2ac; }
+.error { background:#fff5f5; border:1px solid #f56565; }
+</style>
+</head>
+
+<body>
+
+<h2>Update Payments</h2>
+
+<input type="text" id="bookingId" placeholder="Booking ID">
+<input type="number" id="amount" placeholder="Amount">
+
+<select id="mode">
+  <option value="CASH">CASH</option>
+  <option value="ONLINE-MANUAL">ONLINE-MANUAL</option>
+</select>
+
+<input type="text" id="reference" placeholder="Reference (optional)">
+
+<button onclick="submitPayment()">Submit Payment</button>
+
+<div id="message"></div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+
+// Protect page (must be logged in)
+if (!sessionStorage.getItem("adminLoggedIn")) {
+  location.href = "admin.html";
+}
+
+async function submitPayment() {
+
+  const bookingId = document.getElementById("bookingId").value;
+  const amount = document.getElementById("amount").value;
+  const mode = document.getElementById("mode").value;
+  const reference = document.getElementById("reference").value;
+
+  const payload = {
+    action: "admin_add_payment",
+    username: "admin",
+    password: "Selvi@2026",
+    bookingId,
+    amount,
+    mode,
+    reference
+  };
+
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(payload)
+  });
+
+  const result = await response.json();
+
+  if (result.success) {
+    showMessage("Payment Added Successfully", true);
+  } else {
+    showMessage(result.error || "Error occurred", false);
+  }
+}
+
+function showMessage(msg, success) {
+  const div = document.getElementById("message");
+  div.className = "notice " + (success ? "success" : "error");
+  div.innerText = msg;
+}
+</script>
+
+</body>
+</html>
