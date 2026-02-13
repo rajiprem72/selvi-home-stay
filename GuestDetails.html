@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+<title>Guest Details</title>
+<style>
+body { font-family:Arial; margin:30px; }
+table { border-collapse:collapse; width:100%; margin-top:20px; }
+th, td { border:1px solid #ccc; padding:6px; }
+th { background:#f4f4f4; }
+</style>
+</head>
+<body>
+
+<h2>Guest Details Report</h2>
+
+<select id="status">
+  <option value="CREATED">CREATED</option>
+  <option value="PARTIAL">PARTIAL</option>
+  <option value="PAID">PAID</option>
+</select>
+
+<button onclick="loadData()">Submit</button>
+
+<div id="report"></div>
+<div id="transactions"></div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+
+async function loadData() {
+
+  const status = document.getElementById("status").value;
+
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method:"POST",
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({
+      action:"get_bookings_by_status",
+      status
+    })
+  });
+
+  const result = await res.json();
+
+  let html = "<table><tr><th>BookingID</th><th>Name</th><th>Mobile</th><th>Email</th><th>From</th><th>To</th><th>Days</th><th>Base</th><th>Paid</th><th>Balance</th><th>Coupon</th></tr>";
+
+  result.data.forEach(r => {
+    html += `<tr>
+      <td><a href="#" onclick="loadPayments('${r.bookingId}')">${r.bookingId}</a></td>
+      <td>${r.name}</td>
+      <td>${r.mobile}</td>
+      <td>${r.email}</td>
+      <td>${r.fromDate}</td>
+      <td>${r.toDate}</td>
+      <td>${r.days}</td>
+      <td>${r.baseAmount}</td>
+      <td>${r.paidSoFar}</td>
+      <td>${r.balance}</td>
+      <td>${r.coupon}</td>
+    </tr>`;
+  });
+
+  html += "</table>";
+  document.getElementById("report").innerHTML = html;
+}
+
+async function loadPayments(bookingId) {
+
+  const res = await fetch(APPS_SCRIPT_URL,{
+    method:"POST",
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({
+      action:"get_payments_by_booking",
+      bookingId
+    })
+  });
+
+  const result = await res.json();
+
+  let html="<h3>Transactions</h3><table><tr><th>PaymentID</th><th>Date</th><th>Amount</th><th>Mode</th><th>Reference</th><th>EnteredBy</th></tr>";
+
+  result.data.forEach(p=>{
+    html+=`<tr>
+      <td>${p.paymentId}</td>
+      <td>${p.date}</td>
+      <td>${p.amount}</td>
+      <td>${p.mode}</td>
+      <td>${p.reference}</td>
+      <td>${p.enteredBy}</td>
+    </tr>`;
+  });
+
+  html+="</table>";
+  document.getElementById("transactions").innerHTML = html;
+}
+</script>
+
+</body>
+</html>
