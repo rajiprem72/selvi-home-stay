@@ -1,76 +1,104 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin — Selvi Home Stay</title>
-<link rel="icon" type="image/png" href="images/favicon.png">
-<link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0f172a">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('✅ Service Worker registered:', reg.scope))
-        .catch(err => console.log('❌ Service Worker registration failed:', err));
-    });
-  }
-</script> 
+<title>Admin Panel - Selvi Home Stay</title>
+<style>
+body { font-family: Arial; max-width: 500px; margin: 40px auto; }
+input, select, button { width: 100%; padding: 8px; margin: 8px 0; }
+.hidden { display:none; }
+.notice { padding:10px; margin-top:10px; border-radius:6px; }
+.success { background:#e6fffa; border:1px solid #38b2ac; }
+.error { background:#fff5f5; border:1px solid #f56565; }
+</style>
 </head>
+
 <body>
-<div id="nav-placeholder"></div>  
-<div class="container">
 
 <h2>Admin Login</h2>
-<form id="adminLoginForm">
-<label>User ID <input type="text" id="adminUser" required></label>
-<label>Password <input type="password" id="adminPass" required></label>
-<button type="submit">Login</button>
-</form>
-<div id="adminSection" style="display:none">
-<h3>Admin Booking Form</h3>
-<form id="adminForm">
-<label>Name <input type="text" name="Name" required></label>
-<label>Aadhaar Number <input type="text" name="Aadhaar" required></label>
-<label>Mobile Number <input type="text" name="Mobile" required></label>
-<label>Address <textarea name="Address" rows="2" required></textarea></label>
-<div class="form-row">
-<label>From Date <input type="date" name="FromDate" required></label>
-<label>To Date <input type="date" name="ToDate" required></label>
+
+<div id="loginSection">
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 </div>
-<div class="form-row">
-<label>Payment Date <input type="date" name="PaymentDate" required></label>
-<label>Payment Reference Number <input type="text" name="PaymentRefNo" required></label>
+
+<div id="adminSection" class="hidden">
+  <h3>Add Payment</h3>
+
+  <input type="text" id="bookingId" placeholder="Booking ID">
+  <input type="number" id="amount" placeholder="Amount">
+  
+  <select id="mode">
+    <option value="CASH">CASH</option>
+    <option value="ONLINE-MANUAL">ONLINE-MANUAL</option>
+  </select>
+
+  <input type="text" id="reference" placeholder="Reference (optional)">
+
+  <button onclick="submitPayment()">Submit Payment</button>
 </div>
-<label>Payment Amount (₹) <input type="number" name="PaymentAmount" required></label>
-<button type="submit">Add Booking</button>
-</form>
-<div id="result"></div>
-</div>
+
+<div id="message"></div>
+
 <script>
-  const GS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw2vQtjD6maNQJtbrvTBaJjvbmgrkPfYj5RZE1BHzXPwhGKbFq8HL7R4xKsBNFeqLhp8w/exec";
-  document.getElementById('adminForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  data.action = 'admin_booking';
-  data.Source = 'Admin';
-  data.admin_password = 'SELVI@2025';
-  const resDiv = document.getElementById('result');
-  resDiv.textContent = 'Processing...';
-  try {
-    const res = await fetch(GS_WEBAPP_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    const json = await res.json();
-    resDiv.innerHTML = json.error ? "<div style='color:red'>Error: " + (json.error||'Unknown') + "</div>" : "<div style='color:green'>✅ Booking added! ID: <b>" + (json.bookingId||'') + "</b></div>";
-    if(!json.error) e.target.reset();
-  } catch(err) { resDiv.innerHTML = "<div style='color:red'>Error: " + err.message + "</div>"; }
-});
+const APPS_SCRIPT_URL = "YOUR_WEB_APP_URL_HERE";
+
+let adminUser = "";
+let adminPass = "";
+
+function login() {
+
+  adminUser = document.getElementById("username").value;
+  adminPass = document.getElementById("password").value;
+
+  if (!adminUser || !adminPass) {
+    showMessage("Enter username and password", false);
+    return;
+  }
+
+  document.getElementById("loginSection").classList.add("hidden");
+  document.getElementById("adminSection").classList.remove("hidden");
+}
+
+async function submitPayment() {
+
+  const bookingId = document.getElementById("bookingId").value;
+  const amount = document.getElementById("amount").value;
+  const mode = document.getElementById("mode").value;
+  const reference = document.getElementById("reference").value;
+
+  const payload = {
+    action: "admin_add_payment",
+    username: adminUser,
+    password: adminPass,
+    bookingId,
+    amount,
+    mode,
+    reference
+  };
+
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(payload)
+  });
+
+  const result = await response.json();
+
+  if (result.success) {
+    showMessage("Payment Added Successfully", true);
+  } else {
+    showMessage(result.error || "Error occurred", false);
+  }
+}
+
+function showMessage(msg, success) {
+  const div = document.getElementById("message");
+  div.className = "notice " + (success ? "success" : "error");
+  div.innerText = msg;
+}
 </script>
 
-</div>
-<footer>© 2025 Selvi Home Stay <br> Designed by <br> Premanandhan Narayanan<br> WhatsApp +91 98844 86609</footer>
-<script src="script.js"></script>
- 
 </body>
 </html>
