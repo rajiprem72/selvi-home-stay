@@ -3,8 +3,12 @@
 <head>
 <title>Admin Reports - Selvi Home Stay</title>
 <style>
-body { font-family: Arial; max-width:600px; margin:40px auto; }
+body { font-family: Arial; max-width:800px; margin:40px auto; }
 button { width:100%; padding:12px; margin:10px 0; }
+table { width:100%; border-collapse: collapse; margin-top:20px; }
+th, td { border:1px solid #ccc; padding:8px; text-align:left; }
+th { background:#f2f2f2; }
+.mark-btn { padding:6px 10px; background:green; color:white; border:none; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -18,6 +22,94 @@ button { width:100%; padding:12px; margin:10px 0; }
 <button onclick="location.href='UpdatePayments.html'">
 2. Update Payments
 </button>
+
+<button onclick="loadCommissionData()">
+3. Commission Ledger
+</button>
+
+<div id="commissionSection"></div>
+
+<script>
+
+const API_URL = "YOUR_WEB_APP_URL_HERE"; // ← replace
+let adminUsername = "admin";
+let adminPassword = "Selvi@2026";
+
+function loadCommissionData() {
+
+  fetch(API_URL + "?action=get_commission_data")
+  .then(res => res.json())
+  .then(data => {
+
+    if (!data.success) {
+      alert("Failed to load commission data");
+      return;
+    }
+
+    let html = `
+      <h3>Commission Ledger</h3>
+      <table>
+        <tr>
+          <th>Booking ID</th>
+          <th>Guest</th>
+          <th>Days</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+    `;
+
+    data.data.forEach(row => {
+
+      html += `
+        <tr>
+          <td>${row.bookingId}</td>
+          <td>${row.guest}</td>
+          <td>${row.days}</td>
+          <td>₹${row.amount}</td>
+          <td>${row.status}</td>
+          <td>
+            ${row.status === "PENDING" 
+              ? `<button class="mark-btn" onclick="markCommissionPaid('${row.bookingId}')">Mark Paid</button>`
+              : "—"}
+          </td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+
+    document.getElementById("commissionSection").innerHTML = html;
+
+  });
+}
+
+function markCommissionPaid(bookingId) {
+
+  const formData = new URLSearchParams();
+  formData.append("action", "mark_commission_paid");
+  formData.append("bookingId", bookingId);
+  formData.append("username", adminUsername);
+  formData.append("password", adminPassword);
+
+  fetch(API_URL, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if (data.success) {
+      alert("Commission marked as PAID");
+      loadCommissionData();
+    } else {
+      alert("Error: " + (data.error || "Unknown error"));
+    }
+
+  });
+}
+
+</script>
 
 </body>
 </html>
