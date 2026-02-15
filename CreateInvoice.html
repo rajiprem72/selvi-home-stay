@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+<title>Create Invoice</title>
+<style>
+body { font-family: Arial; max-width:700px; margin:40px auto; }
+input, button { padding:10px; width:100%; margin:10px 0; }
+#result { margin-top:20px; }
+</style>
+</head>
+<body>
+
+<h2>Create Invoice</h2>
+
+<input type="text" id="bookingId" placeholder="Enter Booking ID">
+
+<button onclick="fetchInvoice()">Fetch Details</button>
+
+<div id="result"></div>
+
+<script>
+
+const API_URL = "YOUR_WEB_APP_URL";
+
+function fetchInvoice() {
+
+  const bookingId = document.getElementById("bookingId").value;
+
+  fetch(API_URL + "?action=get_invoice_data&bookingId=" + bookingId)
+  .then(res => res.json())
+  .then(data => {
+
+    if (!data.success) {
+      alert("Booking not found");
+      return;
+    }
+
+    const d = data.data;
+
+    document.getElementById("result").innerHTML = `
+      <p><b>Booking ID:</b> ${d.bookingId}</p>
+      <p><b>Date:</b> ${d.date}</p>
+      <p><b>Name:</b> ${d.name}</p>
+      <p><b>From:</b> ${d.fromDate}</p>
+      <p><b>To:</b> ${d.toDate}</p>
+      <p><b>Days:</b> ${d.days}</p>
+      <p><b>Base Amount:</b> ₹${d.baseAmount}</p>
+      <p><b>Discount:</b> ₹${d.discount}</p>
+      <p><b>Net Amount:</b> ₹${d.netAmount}</p>
+      <p><b>Advance Paid:</b> ₹${d.advance}</p>
+      <p><b>Balance:</b> ₹${d.balance}</p>
+      <p><b>Email:</b> ${d.email}</p>
+
+      <button onclick="sendInvoice('${d.bookingId}')">
+        Send Email with Invoice
+      </button>
+    `;
+  });
+}
+
+function sendInvoice(bookingId) {
+
+  const formData = new URLSearchParams();
+  formData.append("action", "send_invoice");
+  formData.append("bookingId", bookingId);
+
+  fetch(API_URL, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Invoice sent successfully!");
+    } else {
+      alert("Error sending invoice");
+    }
+  });
+}
+
+</script>
+
+</body>
+</html>
