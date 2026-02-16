@@ -39,6 +39,9 @@
 .workflow ol { padding-left:20px; line-height:1.7; }
 .muted { color:#6b7280; font-size:.92rem; }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 </head>
 
 <body>
@@ -88,11 +91,11 @@
 </label>
 
 <label>From Date
-  <input type="date" name="FromDate" required>
+  <input type="text" name="FromDate" id="FromDate" required>
 </label>
 
 <label>To Date
-  <input type="date" name="ToDate" required>
+  <input type="text" name="ToDate" id="ToDate" required>
 </label>
 
 <label>Members
@@ -211,11 +214,12 @@ document.getElementById("bookingForm").addEventListener("submit", async function
   submitBtn.textContent = "Submit Booking";
 });
 </script>
-<script>
 
-const MAX_STAY_DAYS = 5;   // 🔒 Hardcoded max stay
+ <script>
 
-async function setupDateRules() {
+const MAX_STAY_DAYS = 5;
+
+async function setupCalendar() {
 
   const res = await fetch(
     APPS_SCRIPT_URL + "?action=get_bookings"
@@ -224,95 +228,47 @@ async function setupDateRules() {
   const result = await res.json();
   const bookings = result.data || [];
 
-  const fromInput = document.querySelector('input[name="FromDate"]');
-  const toInput = document.querySelector('input[name="ToDate"]');
+  const disabledRanges = bookings.map(b => ({
+    from: b.FromDate,
+    to: new Date(new Date(b.ToDate).getTime() - 86400000)
+      .toISOString().split("T")[0]
+  }));
 
   const today = new Date();
-  today.setHours(0,0,0,0);
+  const maxDate = new Date();
+  maxDate.setDate(today.getDate() + 60);
 
-  const maxWindow = new Date();
-  maxWindow.setDate(today.getDate() + 60);
+  const fromPicker = flatpickr("#FromDate", {
+    dateFormat: "Y-m-d",
+    minDate: today,
+    maxDate: maxDate,
+    disable: disabledRanges,
+    onChange: function(selectedDates) {
 
-  const format = d => d.toISOString().split("T")[0];
+      if (!selectedDates.length) return;
 
-  // 🔹 Create blocked dates set
-  const blocked = new Set();
+      const selectedFrom = selectedDates[0];
 
-  bookings.forEach(b => {
-    let start = new Date(b.FromDate);
-    let end = new Date(b.ToDate);
+      const minTo = new Date(selectedFrom);
+      minTo.setDate(minTo.getDate() + 1);
 
-    while (start < end) {
-      blocked.add(format(start));
-      start.setDate(start.getDate() + 1);
+      const maxTo = new Date(selectedFrom);
+      maxTo.setDate(maxTo.getDate() + MAX_STAY_DAYS);
+
+      toPicker.set("minDate", minTo);
+      toPicker.set("maxDate", maxTo);
+      toPicker.clear();
     }
   });
 
-  // 🔹 Find first available date
-  let firstAvailable = new Date(today);
-  while (blocked.has(format(firstAvailable))) {
-    firstAvailable.setDate(firstAvailable.getDate() + 1);
-  }
-
-  fromInput.min = format(firstAvailable);
-  fromInput.max = format(maxWindow);
-
-  // 🔹 FromDate Change
-  fromInput.addEventListener("change", function() {
-
-    const selectedFrom = new Date(this.value);
-
-    if (blocked.has(this.value)) {
-      alert("This date is already booked.");
-      this.value = "";
-      return;
-    }
-
-    // Check if next day is booked
-    const nextDay = new Date(selectedFrom);
-    nextDay.setDate(nextDay.getDate() + 1);
-
-    if (blocked.has(format(nextDay))) {
-      alert("You cannot start booking on this date because next day is already booked.");
-      this.value = "";
-      return;
-    }
-
-    // ToDate must start from next day
-    const minTo = new Date(selectedFrom);
-    minTo.setDate(minTo.getDate() + 1);
-
-    // Max stay limit
-    const maxTo = new Date(selectedFrom);
-    maxTo.setDate(maxTo.getDate() + MAX_STAY_DAYS);
-
-    toInput.min = format(minTo);
-    toInput.max = format(maxTo);
-    toInput.value = "";
-  });
-
-  // 🔹 ToDate Change Validation
-  toInput.addEventListener("change", function() {
-
-    const selectedFrom = new Date(fromInput.value);
-    const selectedTo = new Date(this.value);
-
-    let temp = new Date(selectedFrom);
-
-    while (temp < selectedTo) {
-      if (blocked.has(format(temp))) {
-        alert("Selected range overlaps with an existing booking.");
-        this.value = "";
-        return;
-      }
-      temp.setDate(temp.getDate() + 1);
-    }
-
+  const toPicker = flatpickr("#ToDate", {
+    dateFormat: "Y-m-d",
+    disable: disabledRanges
   });
 
 }
 
-setupDateRules();
+setupCalendar();
 
 </script>
 
