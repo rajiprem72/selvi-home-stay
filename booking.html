@@ -211,6 +211,55 @@ document.getElementById("bookingForm").addEventListener("submit", async function
   submitBtn.textContent = "Submit Booking";
 });
 </script>
+<script>
+
+async function disableBookedDates() {
+
+  const res = await fetch(
+    APPS_SCRIPT_URL + "?action=get_bookings"
+  );
+
+  const result = await res.json();
+  const bookings = result.data || [];
+
+  const fromInput = document.querySelector('input[name="FromDate"]');
+  const toInput = document.querySelector('input[name="ToDate"]');
+
+  // Limit to next 60 days
+  const today = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(today.getDate() + 60);
+
+  const format = d => d.toISOString().split("T")[0];
+
+  fromInput.min = format(today);
+  fromInput.max = format(maxDate);
+  toInput.min = format(today);
+  toInput.max = format(maxDate);
+
+  // Block already booked ranges
+  fromInput.addEventListener("change", function () {
+
+    const selectedFrom = new Date(this.value);
+
+    for (let b of bookings) {
+
+      const bookedFrom = new Date(b.FromDate);
+      const bookedTo = new Date(b.ToDate);
+
+      if (selectedFrom >= bookedFrom && selectedFrom < bookedTo) {
+        alert("Selected date is already booked.");
+        this.value = "";
+        return;
+      }
+    }
+  });
+
+}
+
+disableBookedDates();
+
+</script>
 
 </body>
 </html>
