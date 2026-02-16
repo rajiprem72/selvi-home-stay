@@ -213,7 +213,9 @@ document.getElementById("bookingForm").addEventListener("submit", async function
 </script>
 <script>
 
-async function disableBookedDates() {
+const MAX_STAY_DAYS = 5;   // 🔒 Hardcoded max stay
+
+async function setupDateRules() {
 
   const res = await fetch(
     APPS_SCRIPT_URL + "?action=get_bookings"
@@ -225,39 +227,92 @@ async function disableBookedDates() {
   const fromInput = document.querySelector('input[name="FromDate"]');
   const toInput = document.querySelector('input[name="ToDate"]');
 
-  // Limit to next 60 days
   const today = new Date();
-  const maxDate = new Date();
-  maxDate.setDate(today.getDate() + 60);
+  today.setHours(0,0,0,0);
+
+  const maxWindow = new Date();
+  maxWindow.setDate(today.getDate() + 60);
 
   const format = d => d.toISOString().split("T")[0];
 
-  fromInput.min = format(today);
-  fromInput.max = format(maxDate);
-  toInput.min = format(today);
-  toInput.max = format(maxDate);
+  // 🔹 Create blocked dates set
+  const blocked = new Set();
 
-  // Block already booked ranges
-  fromInput.addEventListener("change", function () {
+  bookings.forEach(b => {
+    let start = new Date(b.FromDate);
+    let end = new Date(b.ToDate);
+
+    while (start < end) {
+      blocked.add(format(start));
+      start.setDate(start.getDate() + 1);
+    }
+  });
+
+  // 🔹 Find first available date
+  let firstAvailable = new Date(today);
+  while (blocked.has(format(firstAvailable))) {
+    firstAvailable.setDate(firstAvailable.getDate() + 1);
+  }
+
+  fromInput.min = format(firstAvailable);
+  fromInput.max = format(maxWindow);
+
+  // 🔹 FromDate Change
+  fromInput.addEventListener("change", function() {
 
     const selectedFrom = new Date(this.value);
 
-    for (let b of bookings) {
+    if (blocked.has(this.value)) {
+      alert("This date is already booked.");
+      this.value = "";
+      return;
+    }
 
-      const bookedFrom = new Date(b.FromDate);
-      const bookedTo = new Date(b.ToDate);
+    // Check if next day is booked
+    const nextDay = new Date(selectedFrom);
+    nextDay.setDate(nextDay.getDate() + 1);
 
-      if (selectedFrom >= bookedFrom && selectedFrom < bookedTo) {
-        alert("Selected date is already booked.");
+    if (blocked.has(format(nextDay))) {
+      alert("You cannot start booking on this date because next day is already booked.");
+      this.value = "";
+      return;
+    }
+
+    // ToDate must start from next day
+    const minTo = new Date(selectedFrom);
+    minTo.setDate(minTo.getDate() + 1);
+
+    // Max stay limit
+    const maxTo = new Date(selectedFrom);
+    maxTo.setDate(maxTo.getDate() + MAX_STAY_DAYS);
+
+    toInput.min = format(minTo);
+    toInput.max = format(maxTo);
+    toInput.value = "";
+  });
+
+  // 🔹 ToDate Change Validation
+  toInput.addEventListener("change", function() {
+
+    const selectedFrom = new Date(fromInput.value);
+    const selectedTo = new Date(this.value);
+
+    let temp = new Date(selectedFrom);
+
+    while (temp < selectedTo) {
+      if (blocked.has(format(temp))) {
+        alert("Selected range overlaps with an existing booking.");
         this.value = "";
         return;
       }
+      temp.setDate(temp.getDate() + 1);
     }
+
   });
 
 }
 
-disableBookedDates();
+setupDateRules();
 
 </script>
 
