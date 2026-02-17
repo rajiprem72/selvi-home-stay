@@ -154,14 +154,12 @@ function loadCommissionData() {
   });
 }
 
-  
 function markCommissionPaid(bookingId) {
 
   const formData = new URLSearchParams();
   formData.append("action", "mark_commission_paid");
   formData.append("bookingId", bookingId);
-  formData.append("username", adminUsername);
-  formData.append("password", adminPassword);
+  formData.append("token", sessionStorage.getItem("adminToken"));
 
   fetch(API_URL, {
     method: "POST",
@@ -179,6 +177,7 @@ function markCommissionPaid(bookingId) {
 
   });
 }
+  
 
 </script>
  <script> 
