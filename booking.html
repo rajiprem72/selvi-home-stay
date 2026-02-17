@@ -256,22 +256,43 @@ async function setupCalendar() {
     minDate: today,
     maxDate: maxDate,
     disable: disabledRanges,
+
     onChange: function(selectedDates) {
 
-      if (!selectedDates.length) return;
+  if (!selectedDates.length) return;
 
-      const selectedFrom = selectedDates[0];
+  const selectedFrom = selectedDates[0];
 
-      const minTo = new Date(selectedFrom);
-      minTo.setDate(minTo.getDate() + 1);
+  let allowedDates = [];
 
-      const maxTo = new Date(selectedFrom);
-      maxTo.setDate(maxTo.getDate() + MAX_STAY_DAYS);
+  for (let i = 1; i <= MAX_STAY_DAYS; i++) {
 
-      toPicker.set("minDate", minTo);
-      toPicker.set("maxDate", maxTo);
-      toPicker.clear();
+    let check = new Date(selectedFrom);
+    check.setDate(check.getDate() + i);
+
+    const checkStr = check.toISOString().split("T")[0];
+
+    // 🚨 STOP immediately if this date is already booked
+    if (blockedDates.has(checkStr)) {
+      break;
     }
+
+    allowedDates.push(checkStr);
+  }
+
+  toPicker.clear();
+
+  if (allowedDates.length === 0) {
+    toPicker.set("enable", []);
+    return;
+  }
+
+  toPicker.set("enable", allowedDates);
+  toPicker.set("minDate", allowedDates[0]);
+  toPicker.set("maxDate", allowedDates[allowedDates.length - 1]);
+}
+
+  
   });
 
   const toPicker = flatpickr("#ToDate", {
@@ -284,6 +305,59 @@ async function setupCalendar() {
 setupCalendar();
 
 </script>
+
+
+<script>  
+function updateToDateOptions(fromDateStr, bookedRanges) {
+
+  const toInput = document.querySelector('input[name="ToDate"]');
+  toInput.value = "";
+
+  const fromDate = new Date(fromDateStr);
+  const maxStay = 5;
+
+  // Convert booked ranges into blocked dates
+  const blockedDates = new Set();
+
+  bookedRanges.forEach(range => {
+    let start = new Date(range.FromDate);
+    let end = new Date(range.ToDate);
+
+    while (start < end) {
+      blockedDates.add(start.toISOString().split("T")[0]);
+      start.setDate(start.getDate() + 1);
+    }
+  });
+
+  let allowedEndDate = null;
+
+  for (let i = 1; i <= maxStay; i++) {
+
+    let checkDate = new Date(fromDate);
+    checkDate.setDate(fromDate.getDate() + i);
+
+    const checkStr = checkDate.toISOString().split("T")[0];
+
+    if (blockedDates.has(checkStr)) {
+      break; // 🚨 stop immediately when conflict found
+    }
+
+    allowedEndDate = checkStr;
+  }
+
+  if (allowedEndDate) {
+    toInput.min = new Date(fromDate.getTime() + 86400000)
+                    .toISOString().split("T")[0];
+    toInput.max = allowedEndDate;
+  } else {
+    // No valid stay possible
+    toInput.min = "";
+    toInput.max = "";
+  }
+}
+</script>
+
+  
 <script src="script.js"></script>
 </body>
 </html>
