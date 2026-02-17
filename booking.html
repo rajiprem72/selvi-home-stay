@@ -316,61 +316,8 @@ bookings.forEach(b => {
 }
 
 setupCalendar();
-
 </script>
 
-
-<script>  
-function updateToDateOptions(fromDateStr, bookedRanges) {
-
-  const toInput = document.querySelector('input[name="ToDate"]');
-  toInput.value = "";
-
-  const fromDate = new Date(fromDateStr);
-  const maxStay = 5;
-
-  // Convert booked ranges into blocked dates
-  const blockedDates = new Set();
-
-  bookedRanges.forEach(range => {
-    let start = new Date(range.FromDate);
-    let end = new Date(range.ToDate);
-
-    while (start < end) {
-      blockedDates.add(start.toISOString().split("T")[0]);
-      start.setDate(start.getDate() + 1);
-    }
-  });
-
-  let allowedEndDate = null;
-
-  for (let i = 1; i <= maxStay; i++) {
-
-    let checkDate = new Date(fromDate);
-    checkDate.setDate(fromDate.getDate() + i);
-
-    const checkStr = checkDate.toISOString().split("T")[0];
-
-    if (blockedDates.has(checkStr)) {
-      break; // 🚨 stop immediately when conflict found
-    }
-
-    allowedEndDate = checkStr;
-  }
-
-  if (allowedEndDate) {
-    toInput.min = new Date(fromDate.getTime() + 86400000)
-                    .toISOString().split("T")[0];
-    toInput.max = allowedEndDate;
-  } else {
-    // No valid stay possible
-    toInput.min = "";
-    toInput.max = "";
-  }
-}
-</script>
-
-  
 <script src="script.js"></script>
 </body>
 </html>
