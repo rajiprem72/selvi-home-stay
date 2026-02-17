@@ -1,15 +1,62 @@
 <!doctype html>
 <html>
 <head>
-<title>Create Invoice</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create Invoice - Selvi Home Stay</title>
+
+<link rel="stylesheet" href="style.css">
+
 <style>
-body { font-family: Arial; max-width:700px; margin:40px auto; }
-input, button { padding:10px; width:100%; margin:10px 0; }
-#result { margin-top:20px; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.page-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+input, button {
+  padding: 10px;
+  width: 100%;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+button {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #d97706;
+}
+
+#result {
+  margin-top: 20px;
+}
 </style>
 </head>
+
 <body>
+
+<!-- Navbar -->
 <div id="nav-placeholder"></div>
+
+<!-- Page Content -->
+<div class="page-container">
+
 <h2>Create Invoice</h2>
 
 <input type="text" id="bookingId" placeholder="Enter Booking ID">
@@ -18,9 +65,12 @@ input, button { padding:10px; width:100%; margin:10px 0; }
 
 <div id="result"></div>
 
+</div>
+
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
 
 function fetchInvoice() {
 
@@ -70,16 +120,19 @@ function sendInvoice(bookingId) {
   })
   .then(res => res.json())
   .then(data => {
-    console.log(data);
+
     if (data.success) {
       alert("Invoice sent successfully!");
     } else {
       alert("Error: " + (data.error || JSON.stringify(data)));
     }
+
   });
 }
 
 </script>
+
 <script src="script.js"></script>
+
 </body>
 </html>
