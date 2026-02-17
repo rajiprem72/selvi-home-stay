@@ -264,6 +264,12 @@ bookings.forEach(b => {
   const maxDate = new Date();
   maxDate.setDate(today.getDate() + 60);
 
+  const toPicker = flatpickr("#ToDate", {
+    dateFormat: "Y-m-d",
+    disable: disabledRanges
+  });
+
+  
   const fromPicker = flatpickr("#FromDate", {
     dateFormat: "Y-m-d",
     minDate: today,
@@ -308,11 +314,7 @@ bookings.forEach(b => {
   
   });
 
-  const toPicker = flatpickr("#ToDate", {
-    dateFormat: "Y-m-d",
-    disable: disabledRanges
-  });
-
+  
 }
 
 setupCalendar();
