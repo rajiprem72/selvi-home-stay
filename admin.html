@@ -104,6 +104,7 @@ async function login() {
 
     if (result.success) {
        sessionStorage.setItem("adminToken", result.token);
+       sessionStorage.setItem("adminLoggedIn", "true");
         location.href = "AdminReports.html";
     } else {
       showMessage("Invalid credentials");
