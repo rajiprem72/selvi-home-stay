@@ -185,6 +185,8 @@ function sendWelcomeEmails() {
 
   const formData = new URLSearchParams();
   formData.append("action", "manual_send_welcome");
+  formData.append("token", sessionStorage.getItem("adminToken"));
+
 
   fetch(API_URL, {
     method: "POST",
