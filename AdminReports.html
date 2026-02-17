@@ -79,9 +79,16 @@ th {
 </button>  
 
 <button onclick="loadCommissionData()">
-4. Commission Ledger (Pay Commission & Click Once)
+4. Commission Ledger (Pay Commission & Click )
 </button>
 
+<button onclick="sendWelcomeEmails()">
+5. Send Welcome Email (Tomorrow Arrivals)
+</button>
+
+<div id="welcomeReport"></div>
+
+  
 <div id="commissionSection"></div>
 
 </div>
@@ -168,6 +175,34 @@ function markCommissionPaid(bookingId) {
 }
 
 </script>
+function sendWelcomeEmails() {
+
+  const formData = new URLSearchParams();
+  formData.append("action", "manual_send_welcome");
+
+  fetch(API_URL, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if (!data.success) {
+      document.getElementById("welcomeReport").innerHTML =
+        "<p>No guest arriving tomorrow.</p>";
+      return;
+    }
+
+    document.getElementById("welcomeReport").innerHTML = `
+      <h3>Welcome Email Sent Successfully</h3>
+      <p><strong>Name:</strong> ${data.guestName}</p>
+      <p><strong>Booking ID:</strong> ${data.bookingId}</p>
+      <p><strong>Mobile:</strong> ${data.mobile}</p>
+    `;
+  });
+}
+
+  
 
 <script src="script.js"></script>
 
