@@ -124,12 +124,24 @@
   <textarea name="Message" rows="3"></textarea>
 </label>
 
-<div style="margin:15px 0">
-  <label>
-    <input type="checkbox" id="rulesAgree" required>
-    I agree to the Rules & Regulations
-  </label>
+<div style="margin:20px 0; padding:15px; border:1px solid #ddd; border-radius:8px; background:#f9fafb;">
+
+  <h4 style="margin-top:0;">📜 Rules & Regulations</h4>
+
+  <ul style="line-height:1.6; padding-left:18px;">
+    <li>❌ Cooking or eating <b>Non-Vegetarian food</b> is strictly not allowed in our premises.</li>
+    <li>❌ <b>Alcohol consumption</b> is strictly prohibited during your stay.</li>
+  </ul>
+
+  <div style="margin-top:12px;">
+    <label style="cursor:pointer;">
+      <input type="checkbox" id="rulesAgree" required style="margin-right:8px;">
+      I agree to the above Rules & Regulations
+    </label>
+  </div>
+
 </div>
+
 
 <button type="submit" id="submitBtn" class="btn">Submit Booking</button>
 
