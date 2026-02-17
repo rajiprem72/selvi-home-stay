@@ -107,8 +107,7 @@ async function submitPayment() {
 
   const payload = {
     action: "admin_add_payment",
-    username: "admin",
-    password: "Selvi@2026",
+    token: sessionStorage.getItem("adminToken"),
     bookingId,
     amount,
     mode,
