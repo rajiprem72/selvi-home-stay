@@ -240,6 +240,19 @@ async function setupCalendar() {
 
   const result = await res.json();
   const bookings = result.data || [];
+  // 🔥 Create blockedDates set
+const blockedDates = new Set();
+
+bookings.forEach(b => {
+  let start = new Date(b.FromDate);
+  let end = new Date(b.ToDate);
+
+  while (start < end) {
+    blockedDates.add(start.toISOString().split("T")[0]);
+    start.setDate(start.getDate() + 1);
+  }
+});
+
 
   const disabledRanges = bookings.map(b => ({
     from: b.FromDate,
