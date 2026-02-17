@@ -2,44 +2,85 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Login - Selvi Home Stay</title>
+
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="style.css">
+
 <style>
-body { 
-  font-family: Arial; 
-  margin: 0; 
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 
 .admin-container {
   max-width: 400px;
-  margin: 60px auto;
+  margin: 80px auto;
+  padding: 20px;
 }
 
-input, button { 
-  width: 100%; 
-  padding: 10px; 
-  margin: 10px 0; 
+.admin-container h2 {
+  color: #d97706;
+  margin-bottom: 20px;
 }
 
-.notice { padding:10px; margin-top:10px; border-radius:6px; }
-.error { background:#fff5f5; border:1px solid #f56565; }
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+button {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #d97706;
+}
+
+.notice {
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+.error {
+  background: #fff5f5;
+  border: 1px solid #f56565;
+  color: #7f1d1d;
+}
 </style>
 
-  <link rel="icon" type="image/png" href="images/favicon.png">
-  <link rel="stylesheet" href="style.css">  
 </head>
 
 <body>
+
+<!-- Navbar -->
 <div id="nav-placeholder"></div>
-<h2>Admin Login</h2>
 
-<input type="text" id="username" placeholder="Username">
-<input type="password" id="password" placeholder="Password">
-<button onclick="login()">Login</button>
+<!-- Admin Login Form -->
+<div class="admin-container">
 
-<div id="message"></div>
+  <h2>Admin Login</h2>
+
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+
+  <div id="message"></div>
+
+</div>
 
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+const APPS_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
 
 async function login() {
 
@@ -52,19 +93,24 @@ async function login() {
     password
   };
 
-  const response = await fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(payload)
-  });
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(payload)
+    });
 
-  const result = await response.json();
+    const result = await response.json();
 
-  if (result.success) {
-    sessionStorage.setItem("adminLoggedIn", "true");
-    location.href = "AdminReports.html";
-  } else {
-    showMessage("Invalid credentials");
+    if (result.success) {
+      sessionStorage.setItem("adminLoggedIn", "true");
+      location.href = "AdminReports.html";
+    } else {
+      showMessage("Invalid credentials");
+    }
+
+  } catch (err) {
+    showMessage("Login failed. Try again.");
   }
 }
 
@@ -74,6 +120,9 @@ function showMessage(msg) {
   div.innerText = msg;
 }
 </script>
+
+<!-- Nav Loader -->
 <script src="script.js"></script>
+
 </body>
 </html>
