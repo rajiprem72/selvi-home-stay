@@ -136,7 +136,8 @@ async function pay(type) {
 
   const options = {
     key: "rzp_test_SFC8RWThE195Ua",  // only KEY ID here
-    amount: order.amount,
+    //amount: order.amount,
+    amount: data.balance,
     currency: "INR",
     name: "Selvi Home Stay",
     description: "Booking Payment",
