@@ -2,18 +2,75 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Update Payments - Selvi Home Stay</title>
+
+<link rel="stylesheet" href="style.css">
+
 <style>
-body { font-family: Arial; max-width: 500px; margin: 40px auto; }
-input, select, button { width: 100%; padding: 8px; margin: 8px 0; }
-.notice { padding:10px; margin-top:10px; border-radius:6px; }
-.success { background:#e6fffa; border:1px solid #38b2ac; }
-.error { background:#fff5f5; border:1px solid #f56565; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.page-container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+button {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #d97706;
+}
+
+.notice {
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+.success {
+  background: #e6fffa;
+  border: 1px solid #38b2ac;
+  color: #065f46;
+}
+
+.error {
+  background: #fff5f5;
+  border: 1px solid #f56565;
+  color: #7f1d1d;
+}
 </style>
 </head>
 
 <body>
+
+<!-- Navbar -->
 <div id="nav-placeholder"></div>
+
+<!-- Page Content -->
+<div class="page-container">
+
 <h2>Update Payments</h2>
 
 <input type="text" id="bookingId" placeholder="Booking ID">
@@ -30,8 +87,11 @@ input, select, button { width: 100%; padding: 8px; margin: 8px 0; }
 
 <div id="message"></div>
 
+</div>
+
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+const APPS_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
 
 // Protect page (must be logged in)
 if (!sessionStorage.getItem("adminLoggedIn")) {
@@ -55,18 +115,23 @@ async function submitPayment() {
     reference
   };
 
-  const response = await fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(payload)
-  });
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(payload)
+    });
 
-  const result = await response.json();
+    const result = await response.json();
 
-  if (result.success) {
-    showMessage("Payment Added Successfully", true);
-  } else {
-    showMessage(result.error || "Error occurred", false);
+    if (result.success) {
+      showMessage("Payment Added Successfully", true);
+    } else {
+      showMessage(result.error || "Error occurred", false);
+    }
+
+  } catch (err) {
+    showMessage("Request failed. Please try again.", false);
   }
 }
 
@@ -76,6 +141,8 @@ function showMessage(msg, success) {
   div.innerText = msg;
 }
 </script>
+
 <script src="script.js"></script>
+
 </body>
 </html>
