@@ -111,6 +111,13 @@ function loadCommissionData() {
       return;
     }
 
+    // 🔥 SORT: PENDING first, then PAID
+    data.data.sort((a, b) => {
+      if (a.status === b.status) return 0;
+      if (a.status === "PENDING") return -1;
+      return 1;
+    });
+
     let html = `
       <h3>Commission Ledger</h3>
       <table>
@@ -149,6 +156,7 @@ function loadCommissionData() {
   });
 }
 
+  
 function markCommissionPaid(bookingId) {
 
   const formData = new URLSearchParams();
