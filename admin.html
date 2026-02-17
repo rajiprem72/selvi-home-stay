@@ -103,8 +103,8 @@ async function login() {
     const result = await response.json();
 
     if (result.success) {
-      sessionStorage.setItem("adminLoggedIn", "true");
-      location.href = "AdminReports.html";
+       sessionStorage.setItem("adminToken", result.token);
+        location.href = "AdminReports.html";
     } else {
       showMessage("Invalid credentials");
     }
