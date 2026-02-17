@@ -1,18 +1,69 @@
 <!doctype html>
 <html>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Reports - Selvi Home Stay</title>
+
+<link rel="stylesheet" href="style.css">
+
 <style>
-body { font-family: Arial; max-width:800px; margin:40px auto; }
-button { width:100%; padding:12px; margin:10px 0; }
-table { width:100%; border-collapse: collapse; margin-top:20px; }
-th, td { border:1px solid #ccc; padding:8px; text-align:left; }
-th { background:#f2f2f2; }
-.mark-btn { padding:6px 10px; background:green; color:white; border:none; cursor:pointer; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.admin-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: #f2f2f2;
+}
+
+.mark-btn {
+  padding: 6px 10px;
+  background: green;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
 </style>
 </head>
+
 <body>
+
+<!-- Navbar -->
 <div id="nav-placeholder"></div>
+
+<!-- Content -->
+<div class="admin-container">
+
 <h2>Admin Reports</h2>
 
 <button onclick="location.href='GuestDetails.html'">
@@ -33,9 +84,12 @@ th { background:#f2f2f2; }
 
 <div id="commissionSection"></div>
 
+</div>
+
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec"; // ← replace
+const API_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+
 let adminUsername = "admin";
 let adminPassword = "Selvi@2026";
 
@@ -114,6 +168,8 @@ function markCommissionPaid(bookingId) {
 }
 
 </script>
+
 <script src="script.js"></script>
+
 </body>
 </html>
