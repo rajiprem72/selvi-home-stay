@@ -1,16 +1,69 @@
 <!doctype html>
 <html>
 <head>
-<title>Guest Details</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guest Details - Selvi Home Stay</title>
+
+<link rel="stylesheet" href="style.css">
+
 <style>
-body { font-family:Arial; margin:30px; }
-table { border-collapse:collapse; width:100%; margin-top:20px; }
-th, td { border:1px solid #ccc; padding:6px; }
-th { background:#f4f4f4; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.page-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+select, button {
+  padding: 8px;
+  margin: 5px 10px 15px 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: #f4f4f4;
+}
+
+a {
+  color: #d97706;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
 </style>
 </head>
+
 <body>
+
+<!-- Navbar -->
 <div id="nav-placeholder"></div>
+
+<!-- Page Content -->
+<div class="page-container">
+
 <h2>Guest Details Report</h2>
 
 <select id="status">
@@ -24,8 +77,11 @@ th { background:#f4f4f4; }
 <div id="report"></div>
 <div id="transactions"></div>
 
+</div>
+
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
+const APPS_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbxJJUirnar3OBGwszagDNWH_Js0FhYfzKMYyRVl06bH4IOseYcZ3vIRr6izAHERWqko/exec";
 
 async function loadData() {
 
@@ -94,6 +150,8 @@ async function loadPayments(bookingId) {
   document.getElementById("transactions").innerHTML = html;
 }
 </script>
+
 <script src="script.js"></script>
+
 </body>
 </html>
