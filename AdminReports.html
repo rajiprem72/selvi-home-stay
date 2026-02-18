@@ -354,6 +354,90 @@ function createMonth(month, year, bookings, today, maxDate) {
 
 </script>
 
+  <script>
+function loadUpcomingGuests() {
+
+  document.getElementById("adminMenu").style.display = "none";
+  document.getElementById("calendarSection").style.display = "none";
+  document.getElementById("guestSection").style.display = "block";
+
+  fetch(API_URL + "?action=get_upcoming_guests")
+  .then(res => res.json())
+  .then(response => {
+
+    const guests = response.data || [];
+
+    if (guests.length === 0) {
+      document.getElementById("guestTable").innerHTML =
+        "<p>No upcoming guests.</p>";
+      return;
+    }
+
+    let html = `
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Booking ID</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Mobile</th>
+          <th>Email</th>
+          <th>Days</th>
+          <th>Payment Status</th>
+          <th>Coupon</th>
+        </tr>
+    `;
+
+    guests.forEach((g, index) => {
+
+      html += `
+        <tr>
+          <td>${g.name}</td>
+          <td>
+            <a href="#" onclick="toggleDetails(${index}); return false;">
+              ${g.bookingId}
+            </a>
+          </td>
+          <td>${g.fromDate}</td>
+          <td>${g.toDate}</td>
+          <td>${g.mobile}</td>
+          <td>${g.email}</td>
+          <td>${g.days}</td>
+          <td>${g.paymentStatus}</td>
+          <td>${g.couponCode || "-"}</td>
+        </tr>
+
+        <tr id="details-${index}" style="display:none; background:#f9f9f9;">
+          <td colspan="9">
+            <strong>Base:</strong> ₹${g.baseAmount} |
+            <strong>Discount:</strong> ₹${g.discount} |
+            <strong>Net:</strong> ₹${g.netAmount} |
+            <strong>Advance Required:</strong> ₹${g.advanceRequired} |
+            <strong>Paid So Far:</strong> ₹${g.paidSoFar} |
+            <strong>Balance:</strong> ₹${g.balanceAmount}
+          </td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+
+    document.getElementById("guestTable").innerHTML = html;
+  });
+}
+
+function toggleDetails(index) {
+
+  const row = document.getElementById("details-" + index);
+
+  if (row.style.display === "none") {
+    row.style.display = "table-row";
+  } else {
+    row.style.display = "none";
+  }
+}
+</script>  
+
 <script src="script.js"></script>
 
 </body>
