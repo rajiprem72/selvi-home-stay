@@ -199,6 +199,10 @@ function loadBookings() {
   .then(response => {
 
   const bookings = response.data || [];
+  bookings.sort((a, b) => {
+  return new Date(a.checkin) - new Date(b.checkin);
+});
+  
 
   if (!Array.isArray(bookings)) {
     document.getElementById("calendarContainer").innerHTML =
