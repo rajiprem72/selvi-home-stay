@@ -190,14 +190,23 @@ function showMenu() {
 }
 
 /* ===================== CALENDAR LOGIC ===================== */
-
 function loadBookings() {
 
-  document.getElementById("calendarContainer").innerHTML = "";
+  document.getElementById("calendarContainer").innerHTML = "Loading...";
 
   fetch(API_URL + "?action=get_bookings")
   .then(res => res.json())
   .then(bookings => {
+
+    console.log(bookings);   // 🔥 check browser console
+
+    if (!bookings || bookings.length === 0) {
+      document.getElementById("calendarContainer").innerHTML = 
+        "<p>No bookings found.</p>";
+      return;
+    }
+
+    document.getElementById("calendarContainer").innerHTML = "";
 
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -212,8 +221,14 @@ function loadBookings() {
       createMonth(m.month, m.year, bookings, today, maxDate);
     });
 
+  })
+  .catch(err => {
+    document.getElementById("calendarContainer").innerHTML =
+      "Error loading bookings.";
+    console.error(err);
   });
 }
+
 
 function getMonthsInRange(start, end) {
   let months = [];
