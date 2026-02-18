@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Booking Calendar</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.calendar-container {
+  display: flex;
+  gap: 20px;
+}
+
+.month {
+  border: 1px solid #ccc;
+  padding: 10px;
+  flex: 1;
+}
+
+.month h2 {
+  text-align: center;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.day-name {
+  font-weight: bold;
+  text-align: center;
+}
+
+.day {
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.free {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.booked-light {
+  background-color: #64B5F6;
+  color: white;
+}
+
+.booked-dark {
+  background-color: #1976D2;
+  color: white;
+}
+
+.outside-range {
+  background-color: #eee;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .calendar-container {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Selvi Home Stay - Booking Calendar</h1>
+<div class="calendar-container" id="calendarContainer"></div>
+
+<script>
+
+const API_URL = ""; // paste your web app URL
+
+const today = new Date();
+today.setHours(0,0,0,0);
+
+const maxDate = new Date();
+maxDate.setDate(today.getDate() + 60);
+maxDate.setHours(0,0,0,0);
+
+const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function formatDate(date) {
+  return date.toISOString().split("T")[0];
+}
+
+function getMonthsInRange(start, end) {
+  let months = [];
+  let current = new Date(start.getFullYear(), start.getMonth(), 1);
+
+  while (current <= end) {
+    months.push({
+      month: current.getMonth(),
+      year: current.getFullYear()
+    });
+    current.setMonth(current.getMonth() + 1);
+  }
+  return months;
+}
+
+function createMonth(month, year, bookings) {
+
+  const monthDiv = document.createElement("div");
+  monthDiv.className = "month";
+
+  const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
+  monthDiv.innerHTML = `<h2>${monthName} ${year}</h2>`;
+
+  const calendar = document.createElement("div");
+  calendar.className = "calendar";
+
+  dayNames.forEach(day => {
+    const d = document.createElement("div");
+    d.className = "day-name";
+    d.innerText = day;
+    calendar.appendChild(d);
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    calendar.appendChild(document.createElement("div"));
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+
+    const currentDate = new Date(year, month, day);
+    currentDate.setHours(0,0,0,0);
+
+    const dateStr = formatDate(currentDate);
+
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day";
+
+    if (currentDate < today || currentDate > maxDate) {
+      dayDiv.classList.add("outside-range");
+    } else {
+
+      let bookingIndex = -1;
+
+      bookings.forEach((booking, index) => {
+        if (dateStr >= booking.checkin && dateStr < booking.checkout) {
+          bookingIndex = index;
+        }
+      });
+
+      if (bookingIndex >= 0) {
+        dayDiv.classList.add(
+          bookingIndex % 2 === 0 ? "booked-light" : "booked-dark"
+        );
+      } else {
+        dayDiv.classList.add("free");
+      }
+    }
+
+    dayDiv.innerText = day;
+    calendar.appendChild(dayDiv);
+  }
+
+  monthDiv.appendChild(calendar);
+  return monthDiv;
+}
+
+async function loadBookings() {
+
+  const response = await fetch(API_URL);
+  const bookings = await response.json();
+
+  const container = document.getElementById("calendarContainer");
+
+  const monthsToShow = getMonthsInRange(today, maxDate);
+
+  monthsToShow.forEach(m => {
+    container.appendChild(createMonth(m.month, m.year, bookings));
+  });
+}
+
+loadBookings();
+
+</script>
+
+</body>
+</html>
