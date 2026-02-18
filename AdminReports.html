@@ -196,7 +196,16 @@ function loadBookings() {
 
   fetch(API_URL + "?action=get_bookings")
   .then(res => res.json())
-  .then(bookings => {
+  .then(response => {
+
+  const bookings = response.data || [];
+
+  if (!Array.isArray(bookings)) {
+    document.getElementById("calendarContainer").innerHTML =
+      "No booking data available.";
+    return;
+  }
+
 
     console.log(bookings);   // 🔥 check browser console
 
