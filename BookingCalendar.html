@@ -171,23 +171,29 @@ function createMonth(month, year, bookings) {
   return monthDiv;
 }
 
-async function loadBookings() {
+function loadBookings() {
 
-  const response = await fetch(API_URL);
-  const bookings = await response.json();
+  google.script.run
+    .withSuccessHandler(function(bookings) {
 
-  const container = document.getElementById("calendarContainer");
+      const container = document.getElementById("calendarContainer");
+      const monthsToShow = getMonthsInRange(today, maxDate);
 
-  const monthsToShow = getMonthsInRange(today, maxDate);
+      monthsToShow.forEach(m => {
+        container.appendChild(createMonth(m.month, m.year, bookings));
+      });
 
-  monthsToShow.forEach(m => {
-    container.appendChild(createMonth(m.month, m.year, bookings));
-  });
+    })
+    .withFailureHandler(function(error){
+      alert("Error loading bookings: " + error.message);
+    })
+    .getBookings();   // 👈 This calls Apps Script function
 }
 
-loadBookings();
-
+  
 </script>
 
+
+  
 </body>
 </html>
