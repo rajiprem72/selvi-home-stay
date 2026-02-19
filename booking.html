@@ -249,7 +249,7 @@ const blockedDates = new Set();
 
 
   while (start < end) {
-    blockedDates.add(start.toISOString().split("T")[0]);
+    blockedDates.add(formatLocalDate(check));
     start.setDate(start.getDate() + 1);
   }
 });
@@ -257,8 +257,10 @@ const blockedDates = new Set();
 
 const disabledRanges = bookings.map(b => ({
   from: b.checkin,
-  to: new Date(new Date(b.checkout).getTime() - 86400000)
-    .toISOString().split("T")[0]
+ to: formatLocalDate(
+  new Date(new Date(b.checkout).getTime() - 86400000)
+)
+
 }));
 
 
@@ -291,7 +293,8 @@ const disabledRanges = bookings.map(b => ({
     let check = new Date(selectedFrom);
     check.setDate(check.getDate() + i);
 
-    const checkStr = check.toISOString().split("T")[0];
+    const checkStr = formatLocalDate(check);
+
 
     // 🚨 STOP immediately if this date is already booked
     if (blockedDates.has(checkStr)) {
@@ -318,8 +321,14 @@ const disabledRanges = bookings.map(b => ({
 
   
 }
-
 setupCalendar();
+</script>
+<script>
+function formatLocalDate(date) {
+  return date.getFullYear() + "-" +
+    String(date.getMonth() + 1).padStart(2, '0') + "-" +
+    String(date.getDate()).padStart(2, '0');
+}
 </script>
 
 <script src="script.js"></script>
