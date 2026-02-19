@@ -156,6 +156,11 @@ th {
 <button onclick="loadUpcomingGuests()">
 7. Guest List (Next 60 Days)
 </button>
+
+<button onclick="loadReferralPartners()">
+8. Referral Partner Report
+</button>
+
   
 
 <div id="welcomeReport"></div>
@@ -189,6 +194,17 @@ th {
 
 </div>
 
+<!-- ================= REFERRAL PARTNER SECTION ================= -->
+<div id="referralSection" style="display:none;">
+  
+  <button onclick="showMenu()">⬅ Back to Admin Menu</button>
+
+  <h3>Referral Partner Report</h3>
+
+  <div id="referralTable"></div>
+  <div id="referralCommissionDetails"></div>
+
+</div>
 
   
 <script>
@@ -438,6 +454,112 @@ function toggleDetails(index) {
 }
 </script>  
 
+<script>
+function loadReferralPartners() {
+
+  document.getElementById("adminMenu").style.display = "none";
+  document.getElementById("calendarSection").style.display = "none";
+  document.getElementById("guestSection").style.display = "none";
+  document.getElementById("referralSection").style.display = "block";
+
+  fetch(API_URL + "?action=get_referral_partners")
+  .then(res => res.json())
+  .then(response => {
+
+    const partners = response.data || [];
+
+    let html = `
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th>Email</th>
+          <th>Coupon Code</th>
+        </tr>
+    `;
+
+    partners.forEach(p => {
+      html += `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.mobile}</td>
+          <td>${p.email}</td>
+          <td>
+            <a href="#" onclick="loadReferralCommissions('${p.mobile}'); return false;">
+              ${p.coupon}
+            </a>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+
+    document.getElementById("referralTable").innerHTML = html;
+    document.getElementById("referralCommissionDetails").innerHTML = "";
+
+  });
+}
+</script>  
+
+<script>
+function loadReferralCommissions(mobile) {
+
+  fetch(API_URL + "?action=get_referral_commissions&mobile=" + mobile)
+  .then(res => res.json())
+  .then(response => {
+
+    const data = response.data;
+
+    if (!data || !data.commissions.length) {
+      document.getElementById("referralCommissionDetails").innerHTML =
+        "<p>No commission records found.</p>";
+      return;
+    }
+
+    let html = `
+      <h4>Commission Details</h4>
+      <table>
+        <tr>
+          <th>Booking ID</th>
+          <th>Guest Name</th>
+          <th>Days</th>
+          <th>Total Commission</th>
+          <th>Status</th>
+          <th>Paid Date</th>
+        </tr>
+    `;
+
+    data.commissions.forEach(c => {
+      html += `
+        <tr>
+          <td>${c.bookingId}</td>
+          <td>${c.guestName}</td>
+          <td>${c.days}</td>
+          <td>₹${c.totalCommission}</td>
+          <td>${c.commissionStatus}</td>
+          <td>${c.commissionPaidDate || "-"}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+      </table>
+      <br>
+      <strong>Total Paid:</strong> ₹${data.totalPaid}
+      <br>
+      <strong>Total Pending:</strong> ₹${data.totalPending}
+    `;
+
+    document.getElementById("referralCommissionDetails").innerHTML = html;
+  });
+}
+
+  
+</script>  
+
+
+  
 <script src="script.js"></script>
 
 </body>
