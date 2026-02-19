@@ -240,6 +240,7 @@ async function setupCalendar() {
 
   const result = await res.json();
   const bookings = result.data || [];
+  bookings.sort((a,b) => new Date(a.checkin) - new Date(b.checkin));
   // 🔥 Create blockedDates set
 const blockedDates = new Set();
 
@@ -248,10 +249,18 @@ const blockedDates = new Set();
     let end = new Date(b.checkout);
 
 
-  while (start < end) {
-    blockedDates.add(formatLocalDate(check));
-    start.setDate(start.getDate() + 1);
-  }
+  // Block only the nights actually occupied
+let current = new Date(start);
+
+while (current < end) {
+
+  // Do NOT block the checkout date
+  const currentStr = formatLocalDate(current);
+
+  blockedDates.add(currentStr);
+
+  current.setDate(current.getDate() + 1);
+}
 });
 
 
@@ -296,11 +305,18 @@ const disabledRanges = bookings.map(b => ({
     const checkStr = formatLocalDate(check);
 
 
-    // 🚨 STOP immediately if this date is already booked
-    if (blockedDates.has(checkStr)) {
-      break;
-    }
+   // Only block if check date is occupied as a night
+// But allow checkout date if it's exactly the next booking's checkin
 
+if (blockedDates.has(checkStr)) {
+
+  // If this is the FIRST day after FromDate, allow it as checkout
+  if (i === 1) {
+    allowedDates.push(checkStr);
+  }
+
+  break;
+}
     allowedDates.push(checkStr);
   }
 
