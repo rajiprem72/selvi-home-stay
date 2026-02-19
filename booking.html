@@ -243,9 +243,10 @@ async function setupCalendar() {
   // 🔥 Create blockedDates set
 const blockedDates = new Set();
 
-bookings.forEach(b => {
-  let start = new Date(b.FromDate);
-  let end = new Date(b.ToDate);
+  bookings.forEach(b => {
+    let start = new Date(b.checkin);
+    let end = new Date(b.checkout);
+
 
   while (start < end) {
     blockedDates.add(start.toISOString().split("T")[0]);
@@ -254,11 +255,12 @@ bookings.forEach(b => {
 });
 
 
-  const disabledRanges = bookings.map(b => ({
-    from: b.FromDate,
-    to: new Date(new Date(b.ToDate).getTime() - 86400000)
-      .toISOString().split("T")[0]
-  }));
+const disabledRanges = bookings.map(b => ({
+  from: b.checkin,
+  to: new Date(new Date(b.checkout).getTime() - 86400000)
+    .toISOString().split("T")[0]
+}));
+
 
   const today = new Date();
   const maxDate = new Date();
