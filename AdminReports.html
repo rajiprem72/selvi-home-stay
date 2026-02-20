@@ -554,10 +554,39 @@ function loadReferralCommissions(mobile) {
     document.getElementById("referralCommissionDetails").innerHTML = html;
   });
 }
-
-  
 </script>  
+<script>
 
+function sendWelcomeEmails() {
+
+  const formData = new URLSearchParams();
+  formData.append("action", "manual_send_welcome");
+  formData.append("token", sessionStorage.getItem("adminToken"));
+
+  fetch(API_URL, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if (!data.success) {
+      document.getElementById("welcomeReport").innerHTML =
+        "<p>No guest arriving tomorrow.</p>";
+      return;
+    }
+
+    document.getElementById("welcomeReport").innerHTML = `
+      <h3>Welcome Email Sent Successfully</h3>
+      <p><strong>Name:</strong> ${data.guestName}</p>
+      <p><strong>Booking ID:</strong> ${data.bookingId}</p>
+      <p><strong>Mobile:</strong> ${data.mobile}</p>
+    `;
+  });
+
+}
+
+</script>
 
   
 <script src="script.js"></script>
